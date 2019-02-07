@@ -5,7 +5,7 @@
 *.jpeg
 *.gif
 
-#temp files
+# temp files
 *~
 *.swp
 
@@ -44,3 +44,5 @@
 # Debug files
 *.dSYM/
 *.su
+
+main
