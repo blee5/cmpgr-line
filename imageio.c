@@ -4,7 +4,7 @@
 #include "image.h"
 #include "imageio.h"
 
-void clear_Image(Image s)
+void clear_image(Image s)
 {
     int x, y;
     color c;

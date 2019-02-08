@@ -1,6 +1,6 @@
-OBJECTS= main.o draw.o imageio.o
-CFLAGS= -Wall
-CC= gcc
+OBJECTS = main.o draw.o imageio.o
+CFLAGS = -Wall
+CC = gcc
 
 run: main
 	./main

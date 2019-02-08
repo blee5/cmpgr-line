@@ -39,45 +39,32 @@ void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
     /* Note everything is scaled by 2 to avoid the pesky floating point number 1/2 */
     A = dy * 2;
     B = -dx * 2;
-    if (abs(dx) >= abs(dy)) // m <= 1
+    if (abs(dx) >= abs(dy)) // -1 <= m <= 1
     {
-        D = 2 * dy - dx;
-        if (dy >= 0)
+        int cy = 1;
+        if (dy < 0)
         {
-            while (x <= x1)
-            {
-                plot(x, y, s, c);
-                if (D > 0) // next midpoint is below the line
-                {
-                    y++;
-                    D += B;
-                }
-                x++;
-                D += A;
-            }
+            cy = -1;
+            A *= -1;
         }
-        else
+        D = 2 * A + B;
+        while (x <= x1)
         {
-            while (x <= x1)
+            plot(x, y, s, c);
+            if (D > 0) // next midpoint is below the line
             {
-                plot(x, y, s, c);
-                if (D < 0) // next midpoint is above the line
-                {
-                    y--;
-                    D -= B;
-                }
-                x++;
-                D += A;
+                y += cy;
+                D += B;
             }
+            x++;
+            D += A;
         }
     }
     else
     {
-        D = dy - 2 * dx;
-        dx *= 2;
-        dy *= 2;
         if (dy >= 0)
         {
+            D = A + 2 * B;
             while (y <= y1)
             {
                 plot(x, y, s, c);
@@ -92,6 +79,7 @@ void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
         }
         else
         {
+            D = A - 2 * B;
             while (y >= y1)
             {
                 plot(x, y, s, c);
