@@ -4,13 +4,13 @@
 #define XRES 500
 #define YRES 500
 #define MAX_COLOR 255
-#define DEFAULT_COLOR 0
+#define DEFAULT_COLOR 50
 
 struct point_t
 {
-    int r;
-    int g;
-    int b;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
 } point_t;
 
 typedef struct point_t color;

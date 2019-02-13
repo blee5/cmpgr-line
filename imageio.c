@@ -4,6 +4,13 @@
 #include "image.h"
 #include "imageio.h"
 
+Image *init_image()
+{
+    Image *s = malloc(sizeof (Image));
+    clear_image(*s);
+    return s;
+}
+
 void clear_image(Image s)
 {
     int x, y;
