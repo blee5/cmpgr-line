@@ -9,10 +9,8 @@
 
 int main()
 {
-    /* struct matrix *m = new_matrix(1, 1); */
-    /* setval_matrix(m, 9, 3, 12); */
-    /* ident(m); */
-    /* print_matrix(m); */
-    /* free_matrix(m); */
+    struct matrix *m = new_matrix(5, 5);
+    ident(m);
+    print_matrix(m);
     return 0;
 }
