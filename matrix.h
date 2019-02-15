@@ -3,13 +3,13 @@
 
 struct matrix
 {
-    double *m;
+    double *mat;
     int rows, cols;
     int lastcol;
 } matrix;
 
 /* Macro to help matrix access */
-#define idx_matrix(m, r, c) m->m[c * m->rows + r]
+#define mt_idx(m, r, c) m->mat[(c) * m->rows + (r)]
 
 struct matrix *new_matrix(int rows, int cols);
 void free_matrix(struct matrix *m);

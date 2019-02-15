@@ -1,9 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "draw.h"
 #include "image.h"
 #include "imageio.h"
-#include "draw.h"
+#include "matrix.h"
+
+/*
+ * Adds a column to the matrix.
+ * The matrix MUST have exactly 4 rows.
+ */
+void add_column(struct matrix *m, double a, double b, double c, double d)
+{
+    if (m->lastcol == m->cols)
+    {
+        grow_matrix(m, 10);
+    }
+    double *p = &mt_idx(m, 0, m->lastcol);
+    *p++ = a; *p++ = b; *p++ = c; *p = d;
+    m->lastcol++;
+}
+
+/*
+ * Adds point (x, y, z) to the matrix.
+ * The matrix MUST have exactly 4 rows.
+ */
+void add_point(struct matrix *m, double x, double y, double z)
+{
+    add_column(m, x, y, z, 1);
+}
+
+/*
+ * Adds a line connecting (x0, y0, z0) to (x1, y1, z1) to points.
+ * The matrix MUST have exactly 4 rows.
+ */
+void add_edge(struct matrix *points,
+              double x0, double y0, double z0,
+              double x1, double y1, double z1)
+{
+    add_point(points, x0, y0, z0);
+    add_point(points, x1, y1, z1);
+}
+
+/*
+ * Goes through points 2 at a time and draws lines connecting the points.
+ * The matrix should obviously have an even number of columns.
+ */
+void draw_lines(struct matrix *points, Image s, color c)
+{
+    int col;
+    int x0, y0, x1, y1;
+    for (col = 0; col < points->lastcol; col += 2)
+    {
+        x0 = mt_idx(points, 0, col);
+        y0 = mt_idx(points, 1, col);
+        x1 = mt_idx(points, 0, col + 1);
+        y1 = mt_idx(points, 1, col + 1);
+        draw_line(x0, y0, x1, y1, s, c);
+    }
+}
 
 void plot(int x, int y, Image s, color c)
 {

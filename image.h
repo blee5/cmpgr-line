@@ -4,7 +4,7 @@
 #define XRES 500
 #define YRES 500
 #define MAX_COLOR 255
-#define DEFAULT_COLOR 50
+#define DEFAULT_COLOR 0
 
 struct point_t
 {
