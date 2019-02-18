@@ -31,7 +31,7 @@ void print_matrix(struct matrix *m)
         printf("| ");
         for (j = 0; j < cols; j++)
         {
-            printf("%8.5f ", mt_idx(m, i, j));
+            printf("%8.3f ", mt_idx(m, i, j));
         }
         printf(" |\n");
     }
