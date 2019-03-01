@@ -22,10 +22,75 @@
 
 #include "matrix.h"
 
+void clear_transform(struct matrix *transform)
+{
+    free_matrix(transform);
+    transform = ident(4);
+}
+
+void make_translate(struct matrix *transform, double x, double y, double z)
+{
+    struct matrix *m = ident(4);
+    mt_idx(m, 0, 3) = x;
+    mt_idx(m, 1, 3) = y;
+    mt_idx(m, 2, 3) = z;
+    matrix_mult(m, transform);
+    free_matrix(m);
+}
+
+void make_scale(struct matrix *transform, double x, double y, double z)
+{
+    struct matrix *m = ident(4);
+    mt_idx(m, 0, 0) = x;
+    mt_idx(m, 1, 1) = y;
+    mt_idx(m, 2, 2) = z;
+    matrix_mult(m, transform);
+    free_matrix(m);
+}
+
+void make_rotX(struct matrix *transform, double theta)
+{
+    struct matrix *m = ident(4);
+    theta = deg2rad(theta);
+    double sint = sin(theta), cost = cos(theta);
+    mt_idx(m, 1, 1) = cost;
+    mt_idx(m, 1, 2) = -sint;
+    mt_idx(m, 2, 1) = sint;
+    mt_idx(m, 2, 2) = cost;
+    matrix_mult(m, transform);
+    free_matrix(m);
+}
+
+void make_rotY(struct matrix *transform, double theta)
+{
+    struct matrix *m = ident(4);
+    theta = deg2rad(theta);
+    double sint = sin(theta), cost = cos(theta);
+    mt_idx(m, 0, 0) = cost;
+    mt_idx(m, 0, 2) = -sint;
+    mt_idx(m, 2, 0) = sint;
+    mt_idx(m, 2, 2) = cost;
+    matrix_mult(m, transform);
+    free_matrix(m);
+}
+
+void make_rotZ(struct matrix *transform, double theta)
+{
+    struct matrix *m = ident(4);
+    theta = deg2rad(theta);
+    double sint = sin(theta), cost = cos(theta);
+    mt_idx(m, 0, 0) = cost;
+    mt_idx(m, 0, 1) = -sint;
+    mt_idx(m, 1, 0) = sint;
+    mt_idx(m, 1, 1) = cost;
+    matrix_mult(m, transform);
+    free_matrix(m);
+}
+
 void print_matrix(struct matrix *m)
 {
     int i, j;
-    int rows = m->rows, cols = m->lastcol;
+    int rows = m->rows, cols = m->cols;
     for (i = 0; i < rows; i++)
     {
         printf("| ");
@@ -45,19 +110,19 @@ void print_matrix(struct matrix *m)
 void matrix_mult(struct matrix *a, struct matrix *b)
 {
     /* Number of columns in A must match number of columns in B */
-    if (a->lastcol != b->rows)
+    if (a->cols != b->rows)
     {
         fprintf(stderr, "Invalid matrix multiplication: %dx%d * %dx%d\n",
-                a->rows, a->lastcol, b->rows, b->lastcol);
+                a->rows, a->cols, b->rows, b->cols);
         exit(1);
     }
     int i, j, k;
-    int sum;
-    struct matrix *temp = new_matrix(a->rows, b->lastcol);
-    temp->lastcol = b->lastcol;
+    double sum;
+    struct matrix *temp = new_matrix(a->rows, b->cols);
+    temp->cols = b->cols;
     for (i = 0; i < a->rows; i++)
     {
-        for (j = 0; j < b->lastcol; j++)
+        for (j = 0; j < b->cols; j++)
         {
             sum = 0;
             for (k = 0; k < a->rows; k++)
@@ -72,24 +137,17 @@ void matrix_mult(struct matrix *a, struct matrix *b)
 }
 
 /*
- * Turns m into an identity matrix, based on its number of rows.
- * Assumes m is a square matrix.
+ * Returns an identity matrix of size n.
  */
-void ident(struct matrix *m)
+struct matrix *ident(int n)
 {
     int i;
-    if (m->rows != m->cols)
-    {
-        fprintf(stderr, "Attempted to turn a non-square matrix into an identity matrix.\n");
-        exit(1);
-    }
-    /* Clear out matrix */
-    memset(m->mat, 0, sizeof (double) * m->rows * m->cols);
+    struct matrix *m = new_matrix(n, n);
     for (i = 0; i < m->rows; i++)
     {
         mt_idx(m, i, i) = 1;
     }
-    m->lastcol = m->rows;
+    return m;
 }
 
 /*
@@ -111,8 +169,6 @@ struct matrix *new_matrix(int rows, int cols)
     }
     m->rows = rows;
     m->cols = cols;
-    m->lastcol = 0;
-
     return m;
 }
 
@@ -150,5 +206,4 @@ void copy_matrix(struct matrix *src, struct matrix *dest)
     memcpy(dest->mat, src->mat, src->rows * src->cols * sizeof (double));
     dest->rows = src->rows;
     dest->cols = src->cols;
-    dest->lastcol = src->lastcol;
 }

@@ -1,14 +1,15 @@
-OBJECTS = main.o draw.o imageio.o matrix.o
+OBJECTS = main.o draw.o imageio.o matrix.o parser.o
 CFLAGS = -Wall -g
+LDFLAGS = -lm
 CC = gcc
 
 run: main
-	@./main
+	@./main script
 
 main: $(OBJECTS)
-	$(CC) $(CFLAGS) -o main $(OBJECTS)
+	$(CC) $(CFLAGS) -o main $(OBJECTS) $(LDFLAGS)
 
-main.o: main.c imageio.h draw.h image.h matrix.h 
+main.o: main.c imageio.h draw.h image.h matrix.h parser.h
 	$(CC) $(CFLAGS) -c main.c
 
 draw.o: draw.c draw.h image.h
@@ -19,6 +20,9 @@ imageio.o: imageio.c imageio.h image.h
 
 matrix.o: matrix.c matrix.h
 	$(CC) $(CFLAGS) -c matrix.c
+
+parser.o: parser.c parser.h
+	$(CC) $(CFLAGS) -c parser.c
 
 clean:
 	rm *.o
