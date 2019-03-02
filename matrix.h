@@ -9,10 +9,9 @@ struct matrix
 
 /* Macro to help matrix access */
 #define mt_idx(m, r, c) m->mat[(c) * m->rows + (r)]
-#define deg2rad(theta) (theta * 3.141592653 / 180)
+#define deg2rad(theta) (theta * M_PI / 180)
 
 /* Transformation matrices */
-void clear_transform(struct matrix *transform);
 void make_translate(struct matrix *transform, double x, double y, double z);
 void make_scale(struct matrix *transform, double x, double y, double z);
 void make_rotX(struct matrix *transform, double theta);

@@ -22,12 +22,6 @@
 
 #include "matrix.h"
 
-void clear_transform(struct matrix *transform)
-{
-    free_matrix(transform);
-    transform = ident(4);
-}
-
 void make_translate(struct matrix *transform, double x, double y, double z)
 {
     struct matrix *m = ident(4);
