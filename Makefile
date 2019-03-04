@@ -1,5 +1,5 @@
 OBJECTS = main.o draw.o imageio.o matrix.o parser.o
-CFLAGS = -Wall -g
+CFLAGS = -Wall
 LDFLAGS = -lm
 CC = gcc
 

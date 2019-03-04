@@ -114,7 +114,6 @@ void matrix_mult(struct matrix *a, struct matrix *b)
     int i, j, k;
     double sum;
     struct matrix *temp = new_matrix(a->rows, b->cols);
-    temp->cols = b->cols;
     for (i = 0; i < a->rows; i++)
     {
         for (j = 0; j < b->cols; j++)
