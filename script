@@ -42,16 +42,6 @@ ident
 translate
 -250 -250 0
 rotate
-z 50
-translate
-250 250 0
-apply
-display
-
-ident
-translate
--250 -250 0
-rotate
 x 70
 translate
 250 250 0
@@ -62,7 +52,17 @@ ident
 translate
 -250 -250 0
 rotate
-y 90
+y 25
+translate
+250 250 0
+apply
+display
+
+ident
+translate
+-250 -250 0
+rotate
+z 50
 translate
 250 250 0
 apply

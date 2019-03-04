@@ -25,19 +25,6 @@ int main(int argc, char *argv[])
         script = argv[1];
     }
 
-    /* make_translate(transform, -200, -200, 0); */
-    /* make_rotX(transform, 20); */
-    /* matrix_mult(transform, edges); */
-
-    /* make_translate(transform, -250, -250, -50); */
-    /* make_rotX(transform, 5); */
-    /* make_rotY(transform, 5); */
-    /* make_rotZ(transform, 15); */
-    /* make_scale(transform, 0.992, 0.992, 0.992); */
-    /* make_translate(transform, 250, 250, 50); */
-
     parse_file(script, transform, edges, *s);
     free(s);
-    free_matrix(edges);
-    free_matrix(transform);
 }

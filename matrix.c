@@ -61,9 +61,10 @@ void make_rotY(struct matrix *transform, double theta)
     theta = deg2rad(theta);
     double sint = sin(theta), cost = cos(theta);
     mt_idx(m, 0, 0) = cost;
-    mt_idx(m, 0, 2) = -sint;
-    mt_idx(m, 2, 0) = sint;
+    mt_idx(m, 0, 2) = sint;
+    mt_idx(m, 2, 0) = -sint;
     mt_idx(m, 2, 2) = cost;
+    /* print_matrix(m); */
     matrix_mult(m, transform);
     free_matrix(m);
 }

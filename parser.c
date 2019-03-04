@@ -79,7 +79,7 @@ void parse_file(char *filename,
             sscanf(line, "%lf %lf %lf %lf %lf %lf", &x0, &y0, &z0, &x1, &y1, &z1);
             add_edge(edges, x0, y0, z0, x1, y1, z1);
         }
-        else if (strcmp(line, "translate") == 0)
+        else if (strcmp(line, "translate") == 0 || strcmp(line, "move") == 0)
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf", &x, &y, &z);
@@ -99,10 +99,13 @@ void parse_file(char *filename,
             {
                 case 'x':
                     make_rotX(transform, theta);
+                    break;
                 case 'y':
                     make_rotY(transform, theta);
+                    break;
                 case 'z':
                     make_rotZ(transform, theta);
+                    break;
             }
         }
         else if (strcmp(line, "apply") == 0)
@@ -129,6 +132,7 @@ void parse_file(char *filename,
         }
         else if (strcmp(line, "quit") == 0)
         {
+            free(s);
             exit(0);
         }
     }
