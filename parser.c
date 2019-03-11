@@ -70,7 +70,7 @@ void parse_file(char *filename,
         }
     }
   
-    clear_image(s);
+    /* Is there a better way to do this than a long tower of if-elses? */
     while (fgets(line, 255, f) != NULL)
     {
         line[strlen(line)-1] = '\0';

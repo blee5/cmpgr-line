@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     char *script;
 
     edges = new_matrix(4, 0);
-    transform = ident(4);
+    transform = new_matrix(4, 4);
 
     script = "stdin";
     if (argc == 2)
