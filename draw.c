@@ -12,8 +12,12 @@
  */
 void add_column(struct matrix *m, double a, double b, double c, double d)
 {
-    grow_matrix(m, 1);
-    double *p = &mt_idx(m, 0, m->cols - 1);
+    if (m->lastcol == m->cols)
+    {
+        grow_matrix(m, 100);
+    }
+    double *p = &mt_idx(m, 0, m->lastcol);
+    m->lastcol++;
     *p++ = a; *p++ = b; *p++ = c; *p = d;
 }
 
@@ -46,7 +50,7 @@ void draw_lines(struct matrix *points, Image s, color c)
 {
     int col;
     int x0, y0, x1, y1;
-    for (col = 0; col < points->cols; col += 2)
+    for (col = 0; col < points->lastcol; col += 2)
     {
         x0 = mt_idx(points, 0, col);
         y0 = mt_idx(points, 1, col);

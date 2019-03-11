@@ -5,6 +5,7 @@ struct matrix
 {
     double *mat;
     int rows, cols;
+    int lastcol;
 } matrix;
 
 /* Macro to help matrix access */

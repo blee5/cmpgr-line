@@ -85,7 +85,7 @@ void make_rotZ(struct matrix *transform, double theta)
 void print_matrix(struct matrix *m)
 {
     int i, j;
-    int rows = m->rows, cols = m->cols;
+    int rows = m->rows, cols = m->lastcol;
     for (i = 0; i < rows; i++)
     {
         printf("| ");
@@ -104,30 +104,19 @@ void print_matrix(struct matrix *m)
  */
 void matrix_mult(struct matrix *a, struct matrix *b)
 {
-    /* Number of columns in A must match number of columns in B */
-    if (a->cols != b->rows)
+    int i, j;
+    double temp[4];
+    for (i = 0; i < b->lastcol; i++)
     {
-        fprintf(stderr, "Invalid matrix multiplication: %dx%d * %dx%d\n",
-                a->rows, a->cols, b->rows, b->cols);
-        exit(1);
-    }
-    int i, j, k;
-    double sum;
-    struct matrix *temp = new_matrix(a->rows, b->cols);
-    for (i = 0; i < a->rows; i++)
-    {
-        for (j = 0; j < b->cols; j++)
+        memcpy(temp, &mt_idx(b, 0, i), 4 * sizeof(double));
+        for (j = 0; j < b->rows; j++)
         {
-            sum = 0;
-            for (k = 0; k < a->rows; k++)
-            {
-                sum += mt_idx(a, i, k) * mt_idx(b, k, j);
-            }
-            mt_idx(temp, i, j) = sum;
+            mt_idx(b, j, i) = mt_idx(a, j, 0) * temp[0] +
+                              mt_idx(a, j, 1) * temp[1] +
+                              mt_idx(a, j, 2) * temp[2] +
+                              mt_idx(a, j, 3) * temp[3];
         }
     }
-    copy_matrix(temp, b);
-    free_matrix(temp);
 }
 
 /*
@@ -137,6 +126,7 @@ struct matrix *ident(int n)
 {
     int i;
     struct matrix *m = new_matrix(n, n);
+    m->lastcol = n;
     for (i = 0; i < m->rows; i++)
     {
         mt_idx(m, i, i) = 1;
@@ -163,6 +153,7 @@ struct matrix *new_matrix(int rows, int cols)
     }
     m->rows = rows;
     m->cols = cols;
+    m->lastcol = 0;
     return m;
 }
 
@@ -200,4 +191,5 @@ void copy_matrix(struct matrix *src, struct matrix *dest)
     memcpy(dest->mat, src->mat, src->rows * src->cols * sizeof (double));
     dest->rows = src->rows;
     dest->cols = src->cols;
+    dest->lastcol = src->lastcol;
 }
