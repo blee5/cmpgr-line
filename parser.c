@@ -50,8 +50,9 @@ void parse_file(char *filename,
 {
     FILE *f;
     char line[256];
-    double x0, y0, z0, x1, y1, z1;
+    double x0, y0, z0, x1, y1, z1, x2, y2, x3, y3;
     double x, y, z;
+    double r;
     double theta;
     char axis;
 
@@ -78,6 +79,26 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf %lf", &x0, &y0, &z0, &x1, &y1, &z1);
             add_edge(edges, x0, y0, z0, x1, y1, z1);
+        }
+        else if (strcmp(line, "circle") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf", &x, &y, &z, &r);
+            add_circle(edges, x, y, z, r, 0.005);
+        }
+        else if (strcmp(line, "hermite") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
+                          &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
+            add_hermite(edges, x0, y0, x1, y1, x2, y2, x3, y3, 0.005);
+        }
+        else if (strcmp(line, "bezier") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
+                          &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
+            add_bezier(edges, x0, y0, x1, y1, x2, y2, x3, y3, 0.005);
         }
         else if (strcmp(line, "translate") == 0 || strcmp(line, "move") == 0)
         {

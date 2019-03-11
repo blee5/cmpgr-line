@@ -1,10 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "draw.h"
 #include "image.h"
 #include "imageio.h"
 #include "matrix.h"
+
+/*
+ * Adds a circle centered at (cx, cy, cz) with radius r
+ */
+void add_circle(struct matrix *points, double cx, double cy, double cz, double r, double step)
+{
+    double x0, y0, x1, y1;
+    double t = 0, theta = 0;
+    while (t < 1)
+    {
+        theta = t * M_PI * 2;
+        x0 = cx + r * cos(theta);
+        y0 = cy + r * sin(theta);
+        t += step;
+        theta = t * M_PI * 2;
+        x1 = cx + r * cos(theta);
+        y1 = cy + r * sin(theta);
+        add_edge(points, x0, y0, cz, x1, y1, cz);
+    }
+}
+
+/*
+ * Adds a Bezier curve defined with given points, where (x0, y0) and (x3, y3) are endpoints
+ */
+void add_bezier(struct matrix *points, double x0, double y0, double x1, double y1,
+                                       double x2, double y2, double x3, double y3, double step)
+{
+    double xp0, yp0, xp1, yp1, t = 0;
+    /* Parametric equation coefficients */
+    double ax = -x0 + 3 * x1 - 3 * x2 + x3;
+    double bx = 3 * x0 - 6 * x1 + 3 * x2;
+    double cx = -3 * x0 + 3 * x1;
+    double dx = x0;
+    double ay = -y0 + 3 * y1 - 3 * y2 + y3;
+    double by = 3 * y0 - 6 * y1 + 3 * y2;
+    double cy = -3 * y0 + 3 * y1;
+    double dy = y0;
+    while (t < 1)
+    {
+        xp0 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
+        yp0 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
+        t += step;
+        xp1 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
+        yp1 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
+        add_edge(points, xp0, yp0, 0, xp1, yp1, 0);
+    }
+}
+
+/*
+ * Adds a Hermite curve defined with given points, where (x0, y0) and (x1, y1) are endpoints
+ */
+void add_hermite(struct matrix *points, double x0, double y0, double x1, double y1,
+                                       double x2, double y2, double x3, double y3, double step)
+{
+    double xp0, yp0, xp1, yp1, t = 0;
+    /* Parametric equation coefficients */
+    double ax = 2 * x0 + -2 * x1 + x2 + x3;
+    double bx = -3 * x0 + 3 * x1 + -2 * x2 + -x3;
+    double cx = x2; double dx = x0;
+    double ay = 2 * y0 + -2 * y1 + y2 + y3;
+    double by = -3 * y0 + 3 * y1 + -2 * y2 + -y3;
+    double cy = y2; double dy = y0;
+    while (t < 1)
+    {
+        xp0 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
+        yp0 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
+        t += step;
+        xp1 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
+        yp1 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
+        add_edge(points, xp0, yp0, 0, xp1, yp1, 0);
+    }
+}
 
 /*
  * Adds a column to the matrix.
