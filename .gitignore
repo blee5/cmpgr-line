@@ -45,4 +45,8 @@
 *.dSYM/
 *.su
 
+# Python scripts for personal use
+*.py
+
+# Compiled binary
 main
