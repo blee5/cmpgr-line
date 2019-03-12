@@ -20,7 +20,7 @@ $(TARGET_EXEC): $(OBJS)
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 .PHONY: clean
 clean:
