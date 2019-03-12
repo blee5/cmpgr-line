@@ -3,14 +3,13 @@ CC = gcc
 TARGET_EXEC ?= main
 
 BUILD_DIR ?= build
-SRC_DIRS ?= src
+SRC_DIR ?= src
 
-CFLAGS = -Wall
-LFLAGS = -lm
+CFLAGS := -Wall
+LFLAGS := -lm
 
-SRCS := $(shell find $(SRC_DIRS) -name "*.c")
-OBJNAMES := $(SRCS:%.c=%.o)
-OBJS := $(OBJNAMES:%=$(BUILD_DIR)/%)
+SRCS := $(shell find $(SRC_DIR) -name "*.c")
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
 	./$(TARGET_EXEC) script
@@ -18,7 +17,7 @@ run: $(TARGET_EXEC)
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LFLAGS)
 
-$(BUILD_DIR)/%.o: %.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
