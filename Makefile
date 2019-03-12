@@ -1,28 +1,27 @@
-OBJECTS = main.o draw.o imageio.o matrix.o parser.o
-CFLAGS = -Wall
-LDFLAGS = -lm
 CC = gcc
 
-run: main
-	@./main script
+TARGET_EXEC ?= main
 
-main: $(OBJECTS)
-	$(CC) $(CFLAGS) -o main $(OBJECTS) $(LDFLAGS)
+BUILD_DIR ?= build
+SRC_DIRS ?= src
 
-main.o: main.c imageio.h draw.h image.h matrix.h parser.h
-	$(CC) $(CFLAGS) -c main.c
+CFLAGS = -Wall
+LFLAGS = -lm
 
-draw.o: draw.c draw.h image.h
-	$(CC) $(CFLAGS) -c draw.c
+SRCS := $(shell find $(SRC_DIRS) -name "*.c")
+OBJNAMES := $(SRCS:%.c=%.o)
+OBJS := $(OBJNAMES:%=$(BUILD_DIR)/%)
 
-imageio.o: imageio.c imageio.h image.h
-	$(CC) $(CFLAGS) -c imageio.c
+run: $(TARGET_EXEC)
+	./$(TARGET_EXEC) script
 
-matrix.o: matrix.c matrix.h
-	$(CC) $(CFLAGS) -c matrix.c
+$(TARGET_EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LFLAGS)
 
-parser.o: parser.c parser.h
-	$(CC) $(CFLAGS) -c parser.c
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
 
+.PHONY: clean
 clean:
-	rm *.o
+	@rm -rf $(BUILD_DIR)
