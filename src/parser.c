@@ -50,6 +50,8 @@ void parse_file(char *filename,
 {
     FILE *f;
     char line[256];
+    struct matrix *temp;
+
     double x0, y0, z0, x1, y1, z1, x2, y2, x3, y3;
     double x, y, z;
     double r;
@@ -104,13 +106,17 @@ void parse_file(char *filename,
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf", &x, &y, &z);
-            make_translate(transform, x, y, z);
+            temp = make_translate(x, y, z);
+            matrix_mult(temp, transform);
+            free_matrix(temp);
         }
         else if (strcmp(line, "scale") == 0)
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf", &x, &y, &z);
-            make_scale(transform, x, y, z);
+            temp = make_scale(x, y, z);
+            matrix_mult(temp, transform);
+            free_matrix(temp);
         }
         else if (strcmp(line, "rotate") == 0)
         {
@@ -119,15 +125,17 @@ void parse_file(char *filename,
             switch (axis)
             {
                 case 'x':
-                    make_rotX(transform, theta);
+                    temp = make_rotX(theta);
                     break;
                 case 'y':
-                    make_rotY(transform, theta);
+                    temp = make_rotY(theta);
                     break;
                 case 'z':
-                    make_rotZ(transform, theta);
+                    temp = make_rotZ(theta);
                     break;
             }
+            matrix_mult(temp, transform);
+            free_matrix(temp);
         }
         else if (strcmp(line, "apply") == 0)
         {

@@ -22,27 +22,25 @@
 
 #include "matrix.h"
 
-void make_translate(struct matrix *transform, double x, double y, double z)
+struct matrix *make_translate(double x, double y, double z)
 {
     struct matrix *m = ident(4);
     mt_idx(m, 0, 3) = x;
     mt_idx(m, 1, 3) = y;
     mt_idx(m, 2, 3) = z;
-    matrix_mult(m, transform);
-    free_matrix(m);
+    return m;
 }
 
-void make_scale(struct matrix *transform, double x, double y, double z)
+struct matrix *make_scale(double x, double y, double z)
 {
     struct matrix *m = ident(4);
     mt_idx(m, 0, 0) = x;
     mt_idx(m, 1, 1) = y;
     mt_idx(m, 2, 2) = z;
-    matrix_mult(m, transform);
-    free_matrix(m);
+    return m;
 }
 
-void make_rotX(struct matrix *transform, double theta)
+struct matrix *make_rotX(double theta)
 {
     struct matrix *m = ident(4);
     theta = deg2rad(theta);
@@ -51,11 +49,10 @@ void make_rotX(struct matrix *transform, double theta)
     mt_idx(m, 1, 2) = -sint;
     mt_idx(m, 2, 1) = sint;
     mt_idx(m, 2, 2) = cost;
-    matrix_mult(m, transform);
-    free_matrix(m);
+    return m;
 }
 
-void make_rotY(struct matrix *transform, double theta)
+struct matrix *make_rotY(double theta)
 {
     struct matrix *m = ident(4);
     theta = deg2rad(theta);
@@ -64,12 +61,10 @@ void make_rotY(struct matrix *transform, double theta)
     mt_idx(m, 0, 2) = sint;
     mt_idx(m, 2, 0) = -sint;
     mt_idx(m, 2, 2) = cost;
-    /* print_matrix(m); */
-    matrix_mult(m, transform);
-    free_matrix(m);
+    return m;
 }
 
-void make_rotZ(struct matrix *transform, double theta)
+struct matrix *make_rotZ(double theta)
 {
     struct matrix *m = ident(4);
     theta = deg2rad(theta);
@@ -78,8 +73,7 @@ void make_rotZ(struct matrix *transform, double theta)
     mt_idx(m, 0, 1) = -sint;
     mt_idx(m, 1, 0) = sint;
     mt_idx(m, 1, 1) = cost;
-    matrix_mult(m, transform);
-    free_matrix(m);
+    return m;
 }
 
 void print_matrix(struct matrix *m)

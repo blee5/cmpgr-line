@@ -24,3 +24,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 .PHONY: clean
 clean:
 	@rm -rf $(BUILD_DIR)
+	@rm -f $(TARGET_EXEC)

@@ -13,11 +13,11 @@ struct matrix
 #define deg2rad(theta) (theta * M_PI / 180)
 
 /* Transformation matrices */
-void make_translate(struct matrix *transform, double x, double y, double z);
-void make_scale(struct matrix *transform, double x, double y, double z);
-void make_rotX(struct matrix *transform, double theta);
-void make_rotY(struct matrix *transform, double theta);
-void make_rotZ(struct matrix *transform, double theta);
+struct matrix *make_translate(double x, double y, double z);
+struct matrix *make_scale(double x, double y, double z);
+struct matrix *make_rotX(double theta);
+struct matrix *make_rotY(double theta);
+struct matrix *make_rotZ(double theta);
 
 /* Basic matrix manipulation  */
 struct matrix *new_matrix(int rows, int cols);
