@@ -11,6 +11,9 @@
 #define HERMITE 0
 #define BEZIER 1
 
+void add_torus(struct matrix *points, double cx, double cy, double cz, double r, double R, int step);
+void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, int step);
+void add_box(struct matrix *points, double x, double y, double z, double dx, double dy, double dz);
 void add_cubic_curve(struct matrix *points, double ax, double bx, double cx, double dx,
                                             double ay, double by, double cy, double dy, double step);
 void add_bezier(struct matrix *points, double x0, double y0, double x1, double y1,

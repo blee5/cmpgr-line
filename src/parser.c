@@ -53,13 +53,12 @@ void parse_file(char *filename,
     struct matrix *temp;
 
     double x0, y0, z0, x1, y1, z1, x2, y2, x3, y3;
-    double x, y, z;
-    double r;
+    double r, R;
     double theta;
     char axis;
 
     color c;
-    c.r = 0; c.g = 255; c.b = 100;
+    c.r = 0; c.g = 255; c.b = 200;
 
     f = stdin;
     if (strcmp(filename, "stdin") != 0)
@@ -72,7 +71,6 @@ void parse_file(char *filename,
         }
     }
   
-    /* Is there a better way to do this than a long tower of if-elses? */
     while (fgets(line, 255, f) != NULL)
     {
         line[strlen(line)-1] = '\0';
@@ -85,8 +83,8 @@ void parse_file(char *filename,
         else if (strcmp(line, "circle") == 0)
         {
             fgets(line, 255, f);
-            sscanf(line, "%lf %lf %lf %lf", &x, &y, &z, &r);
-            add_circle(edges, x, y, z, r, 0.005);
+            sscanf(line, "%lf %lf %lf %lf", &x0, &y0, &z0, &r);
+            add_circle(edges, x0, y0, z0, r, 0.005);
         }
         else if (strcmp(line, "hermite") == 0)
         {
@@ -94,6 +92,27 @@ void parse_file(char *filename,
             sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
                           &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
             add_hermite(edges, x0, y0, x1, y1, x2, y2, x3, y3, 0.005);
+        }
+        else if (strcmp(line, "box") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf %lf %lf",
+                         &x0, &y0, &z0, &x1, &y1, &z1);
+            add_box(edges, x0, y0, z0, x1, y1, z1);
+        }
+        else if (strcmp(line, "sphere") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf",
+                         &x0, &y0, &z0, &r);
+            add_sphere(edges, x0, y0, z0, r, r * 0.5);
+        }
+        else if (strcmp(line, "torus") == 0)
+        {
+            fgets(line, 255, f);
+            sscanf(line, "%lf %lf %lf %lf %lf",
+                         &x0, &y0, &z0, &r, &R);
+            add_torus(edges, x0, y0, z0, r, R, r * 0.5);
         }
         else if (strcmp(line, "bezier") == 0)
         {
@@ -105,16 +124,16 @@ void parse_file(char *filename,
         else if (strcmp(line, "translate") == 0 || strcmp(line, "move") == 0)
         {
             fgets(line, 255, f);
-            sscanf(line, "%lf %lf %lf", &x, &y, &z);
-            temp = make_translate(x, y, z);
+            sscanf(line, "%lf %lf %lf", &x0, &y0, &z0);
+            temp = make_translate(x0, y0, z0);
             matrix_mult(temp, transform);
             free_matrix(temp);
         }
         else if (strcmp(line, "scale") == 0)
         {
             fgets(line, 255, f);
-            sscanf(line, "%lf %lf %lf", &x, &y, &z);
-            temp = make_scale(x, y, z);
+            sscanf(line, "%lf %lf %lf", &x0, &y0, &z0);
+            temp = make_scale(x0, y0, z0);
             matrix_mult(temp, transform);
             free_matrix(temp);
         }
@@ -146,6 +165,11 @@ void parse_file(char *filename,
             free_matrix(transform);
             transform = ident(4);
         }
+        else if (strcmp(line, "clear") == 0)
+        {
+            free_matrix(edges);
+            edges = new_matrix(4, 0);
+        }
         else if (strcmp(line, "display") == 0)
         {
             clear_image(s);
@@ -161,6 +185,8 @@ void parse_file(char *filename,
         }
         else if (strcmp(line, "quit") == 0)
         {
+            free_matrix(edges);
+            free_matrix(transform);
             free(s);
             exit(0);
         }

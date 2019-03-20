@@ -8,6 +8,68 @@
 #include "matrix.h"
 
 /*
+ * Adds a sphere centered at (cx, cy, cz) with radius r
+ */
+void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, int step)
+{
+    double phi, theta;
+    double x, y, z;
+    double dt = M_PI / step;
+    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    {
+        for (theta = 0; theta < M_PI; theta += dt)
+        {
+            x = r * cos(theta) + cx;
+            y = r * sin(theta) * cos(phi) + cy;
+            z = r * sin(theta) * sin(phi);
+            add_edge(points, x, y, z, x, y, z);
+        }
+    }
+}
+
+/*
+ * Adds a torus centered at (cx, cy, cz) with radius R,
+ * with each cross section having radius r
+ */
+void add_torus(struct matrix *points, double cx, double cy, double cz, double r, double R, int step)
+{
+    double phi, theta;
+    double x, y, z;
+    double dt = M_PI / step;
+    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    {
+        for (theta = 0; theta < 2 * M_PI; theta += dt)
+        {
+            x = r * cos(theta) + cx;
+            y = (r * sin(theta) + R) * cos(phi) + cy;
+            z = (r * sin(theta) + R) * sin(phi) + cz;
+            add_edge(points, x, y, z, x, y, z);
+        }
+    }
+}
+
+/*
+ * Adds a box with the top left vertex located at (x, y, z)
+ */
+void add_box(struct matrix *points, double x, double y, double z, double dx, double dy, double dz)
+{
+    add_edge(points, x, y, z, x + dx, y, z);
+    add_edge(points, x + dx, y, z, x + dx, y - dy, z);
+    add_edge(points, x + dx, y - dy, z, x, y - dy, z);
+    add_edge(points, x, y - dy, z, x, y, z);
+
+    add_edge(points, x, y, z - dz, x + dx, y, z - dz);
+    add_edge(points, x + dx, y, z - dz, x + dx, y - dy, z - dz);
+    add_edge(points, x + dx, y - dy, z - dz, x, y - dy, z - dz);
+    add_edge(points, x, y - dy, z - dz, x, y, z - dz);
+
+    add_edge(points, x, y, z, x, y, z - dz);
+    add_edge(points, x, y - dy, z, x, y - dy, z - dz);
+    add_edge(points, x + dx, y, z, x + dx, y, z - dz);
+    add_edge(points, x + dx, y - dy, z, x + dx, y - dy, z - dz);
+}
+
+/*
  * Adds a circle centered at (cx, cy, cz) with radius r
  */
 void add_circle(struct matrix *points, double cx, double cy, double cz, double r, double step)
