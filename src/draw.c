@@ -50,23 +50,26 @@ void add_torus(struct matrix *polygons, double cx, double cy, double cz, double 
 
 /*
  * Adds a box with the top left vertex located at (x, y, z)
+ * with width dx, height dy, and depth dz
  */
 void add_box(struct matrix *polygons, double x, double y, double z, double dx, double dy, double dz)
 {
-    add_polygon(polygons, x, y, z, x + dx, y, z, x, y - dy, z);
-    add_polygon(polygons, x + dx, y, z, x + dx, y - dy, z, x, y - dy, z);
-    add_polygon(polygons, x, y, z - dz, x + dx, y, z - dz, x, y - dy, z - dz);
-    add_polygon(polygons, x + dx, y, z - dz, x + dx, y - dy, z - dz, x, y - dy, z - dz);
+    double x0 = x, y0 = y, z0 = z;
+    double x1 = x + dx, y1 = y - dy, z1 = z - dz;
+    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x0, y1, z);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x0, y1, z);
+    add_polygon(polygons, x0, y0, z1, x1, y0, z1, x0, y1, z1);
+    add_polygon(polygons, x1, y0, z1, x1, y1, z1, x0, y1, z1);
 
-    add_polygon(polygons, x, y, z, x + dx, y, z, x + dx, y, z - dz);
-    add_polygon(polygons, x + dx, y, z - dz, x, y, z - dz, x, y, z);
-    add_polygon(polygons, x, y - dy, z, x + dx, y - dy, z, x + dx, y - dy, z - dz);
-    add_polygon(polygons, x + dx, y - dy, z - dz, x, y - dy, z - dz, x, y - dy, z);
+    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x1, y0, z1);
+    add_polygon(polygons, x1, y0, z1, x0, y0, z1, x0, y0, z);
+    add_polygon(polygons, x0, y1, z0, x1, y1, z0, x1, y1, z1);
+    add_polygon(polygons, x1, y1, z1, x0, y1, z1, x0, y1, z);
     
-    add_polygon(polygons, x, y, z, x, y - dy, z - dz, x, y - dy, z);
-    add_polygon(polygons, x, y, z, x, y, z - dz, x, y - dy, z - dz);
-    add_polygon(polygons, x + dx, y, z, x + dx, y - dy, z - dz, x + dx, y - dy, z);
-    add_polygon(polygons, x + dx, y, z, x + dx, y, z - dz, x + dx, y - dy, z - dz);
+    add_polygon(polygons, x0, y0, z0, x0, y1, z1, x0, y1, z);
+    add_polygon(polygons, x0, y0, z0, x0, y0, z1, x0, y1, z1);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y1, z);
+    add_polygon(polygons, x1, y0, z0, x1, y0, z1, x1, y1, z1);
 }
 
 /*
@@ -97,15 +100,17 @@ void add_circle(struct matrix *edges, double cx, double cy, double cz, double r,
 void add_cubic_curve(struct matrix *edges, double ax, double bx, double cx, double dx,
                                             double ay, double by, double cy, double dy, double step)
 {
-    double xp0, yp0, xp1, yp1, t = 0;
+    double x0, y0, x1, y1, t = 0;
+    x0 = (ax * t * t * t) + (bx * t * t) + cx * t + dx;
+    y0 = (ay * t * t * t) + (by * t * t) + cy * t + dy;
     while (t < 1)
     {
-        xp0 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
-        yp0 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
         t += step;
-        xp1 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
-        yp1 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
-        add_edge(edges, xp0, yp0, 0, xp1, yp1, 0);
+        x1 = (ax * t * t * t) + (bx * t * t) + cx * t + dx;
+        y1 = (ay * t * t * t) + (by * t * t) + cy * t + dy;
+        add_edge(edges, x0, y0, 0, x1, y1, 0);
+        x0 = x1;
+        y0 = y1;
     }
 }
 
