@@ -53,20 +53,20 @@ void add_torus(struct matrix *polygons, double cx, double cy, double cz, double 
  */
 void add_box(struct matrix *polygons, double x, double y, double z, double dx, double dy, double dz)
 {
-    add_edge(polygons, x, y, z, x + dx, y, z);
-    add_edge(polygons, x + dx, y, z, x + dx, y - dy, z);
-    add_edge(polygons, x + dx, y - dy, z, x, y - dy, z);
-    add_edge(polygons, x, y - dy, z, x, y, z);
+    add_polygon(polygons, x, y, z, x + dx, y, z, x, y - dy, z);
+    add_polygon(polygons, x + dx, y, z, x + dx, y - dy, z, x, y - dy, z);
+    add_polygon(polygons, x, y, z - dz, x + dx, y, z - dz, x, y - dy, z - dz);
+    add_polygon(polygons, x + dx, y, z - dz, x + dx, y - dy, z - dz, x, y - dy, z - dz);
 
-    add_edge(polygons, x, y, z - dz, x + dx, y, z - dz);
-    add_edge(polygons, x + dx, y, z - dz, x + dx, y - dy, z - dz);
-    add_edge(polygons, x + dx, y - dy, z - dz, x, y - dy, z - dz);
-    add_edge(polygons, x, y - dy, z - dz, x, y, z - dz);
-
-    add_edge(polygons, x, y, z, x, y, z - dz);
-    add_edge(polygons, x, y - dy, z, x, y - dy, z - dz);
-    add_edge(polygons, x + dx, y, z, x + dx, y, z - dz);
-    add_edge(polygons, x + dx, y - dy, z, x + dx, y - dy, z - dz);
+    add_polygon(polygons, x, y, z, x + dx, y, z, x + dx, y, z - dz);
+    add_polygon(polygons, x + dx, y, z - dz, x, y, z - dz, x, y, z);
+    add_polygon(polygons, x, y - dy, z, x + dx, y - dy, z, x + dx, y - dy, z - dz);
+    add_polygon(polygons, x + dx, y - dy, z - dz, x, y - dy, z - dz, x, y - dy, z);
+    
+    add_polygon(polygons, x, y, z, x, y - dy, z - dz, x, y - dy, z);
+    add_polygon(polygons, x, y, z, x, y, z - dz, x, y - dy, z - dz);
+    add_polygon(polygons, x + dx, y, z, x + dx, y - dy, z - dz, x + dx, y - dy, z);
+    add_polygon(polygons, x + dx, y, z, x + dx, y, z - dz, x + dx, y - dy, z - dz);
 }
 
 /*
@@ -182,6 +182,19 @@ void add_edge(struct matrix *edges,
 }
 
 /*
+ * Add a polygon to the polygon matrix
+ */
+void add_polygon(struct matrix *polygons,
+                 double x0, double y0, double z0,
+                 double x1, double y1, double z1,
+                 double x2, double y2, double z2)
+{
+    add_point(polygons, x0, y0, z0);
+    add_point(polygons, x1, y1, z1);
+    add_point(polygons, x2, y2, z2);
+}
+
+/*
  * Goes through edges 2 at a time and draws lines connecting the edges.
  * The matrix should obviously have an even number of columns.
  */
@@ -199,6 +212,26 @@ void draw_edges(struct matrix *edges, Image s, color c)
     }
 }
 
+/*
+ * Draw the polygons from the polygon matrix
+ */
+void draw_polygons(struct matrix *polygons, Image s, color c)
+{
+    int col;
+    int x0, y0, x1, y1, x2, y2;
+    for (col = 0; col < polygons->lastcol; col += 3)
+    {
+        x0 = mt_idx(polygons, 0, col);
+        y0 = mt_idx(polygons, 1, col);
+        x1 = mt_idx(polygons, 0, col + 1);
+        y1 = mt_idx(polygons, 1, col + 1);
+        x2 = mt_idx(polygons, 0, col + 2);
+        y2 = mt_idx(polygons, 1, col + 2);
+        draw_line(x0, y0, x1, y1, s, c);
+        draw_line(x1, y1, x2, y2, s, c);
+        draw_line(x2, y2, x0, y0, s, c);
+    }
+}
 void plot(int x, int y, Image s, color c)
 {
     /* NOTE: (0, 0) is the bottom left corner */

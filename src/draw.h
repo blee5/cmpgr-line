@@ -28,6 +28,10 @@ void add_point(struct matrix *edges, double x, double y, double z);
 void add_edge(struct matrix *edges,
               double x0, double y0, double z0,
               double x1, double y1, double z1);
+void add_polygon(struct matrix *polygons,
+                 double x0, double y0, double z0,
+                 double x1, double y1, double z1,
+                 double x2, double y2, double z2);
 void draw_edges(struct matrix *edges, Image s, color c);
 void draw_polygons(struct matrix *polygons, Image s, color c);
 
