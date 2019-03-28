@@ -56,19 +56,19 @@ void add_box(struct matrix *polygons, double x, double y, double z, double dx, d
 {
     double x0 = x, y0 = y, z0 = z;
     double x1 = x + dx, y1 = y - dy, z1 = z - dz;
-    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x0, y1, z);
-    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x0, y1, z);
+    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x0, y1, z0);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x0, y1, z0);
     add_polygon(polygons, x0, y0, z1, x1, y0, z1, x0, y1, z1);
     add_polygon(polygons, x1, y0, z1, x1, y1, z1, x0, y1, z1);
 
     add_polygon(polygons, x0, y0, z0, x1, y0, z0, x1, y0, z1);
-    add_polygon(polygons, x1, y0, z1, x0, y0, z1, x0, y0, z);
+    add_polygon(polygons, x1, y0, z1, x0, y0, z1, x0, y0, z0);
     add_polygon(polygons, x0, y1, z0, x1, y1, z0, x1, y1, z1);
-    add_polygon(polygons, x1, y1, z1, x0, y1, z1, x0, y1, z);
+    add_polygon(polygons, x1, y1, z1, x0, y1, z1, x0, y1, z0);
     
-    add_polygon(polygons, x0, y0, z0, x0, y1, z1, x0, y1, z);
+    add_polygon(polygons, x0, y0, z0, x0, y1, z1, x0, y1, z0);
     add_polygon(polygons, x0, y0, z0, x0, y0, z1, x0, y1, z1);
-    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y1, z);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y1, z0);
     add_polygon(polygons, x1, y0, z0, x1, y0, z1, x1, y1, z1);
 }
 
