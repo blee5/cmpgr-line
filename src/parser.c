@@ -106,14 +106,14 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf",
                          &x0, &y0, &z0, &r);
-            add_sphere(polygons, x0, y0, z0, r, r * 0.5);
+            add_sphere(polygons, x0, y0, z0, r, 5 * sqrt(r));
         }
         else if (strcmp(line, "torus") == 0)
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf",
                          &x0, &y0, &z0, &r, &R);
-            add_torus(polygons, x0, y0, z0, r, R, r * 0.5);
+            add_torus(polygons, x0, y0, z0, r, R, 5 * sqrt(r));
         }
         else if (strcmp(line, "bezier") == 0)
         {
@@ -169,10 +169,8 @@ void parse_file(char *filename,
         }
         else if (strcmp(line, "clear") == 0)
         {
-            free_matrix(edges);
-            free_matrix(polygons);
-            edges = new_matrix(4, 0);
-            polygons = new_matrix(4, 0);
+            edges->lastcol = 0;
+            polygons->lastcol = 0;
         }
         else if (strcmp(line, "display") == 0)
         {

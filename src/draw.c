@@ -6,25 +6,64 @@
 #include "image.h"
 #include "imageio.h"
 #include "matrix.h"
+#include "gmath.h"
 
 /*
  * Adds a sphere centered at (cx, cy, cz) with radius r
  */
 void add_sphere(struct matrix *polygons, double cx, double cy, double cz, double r, int step)
 {
+    struct matrix *points = generate_sphere(cx, cy, cz, r, step);
+    int lat, lgt;
+    int p0, p1, p2, p3;
+    for (lat = 0; lat < step; lat++)
+    {
+        for (lgt = 0; lgt < step; lgt++)
+        {
+            p0 = lat * (step + 1) + lgt;
+            p1 = p0 + 1;
+            p2 = (p1 + step) % points->lastcol;
+            /* If drawing the polygon for the first pole, shift the vertex otherwise p2 == p0 */
+            if (lgt == 0)
+                p2++;
+            add_polygon(polygons, mt_idx(points, 0, p0), mt_idx(points, 1, p0), mt_idx(points, 2, p0),
+                                  mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            /* Draw another triangle to make a quadrilateral, if we aren't at a pole */
+            if (lgt > 0 && lgt < step - 1)
+            {
+                p3 = p2 + 1;
+                add_polygon(polygons, mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                      mt_idx(points, 0, p3), mt_idx(points, 1, p3), mt_idx(points, 2, p3),
+                                      mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            }
+        }
+    }
+    free_matrix(points);
+}
+
+/*
+ * Helper function to generate points on a sphere, with (step + 1) points per semicircle
+ */
+struct matrix *generate_sphere(double cx, double cy, double cz, double r, int step)
+{
+    struct matrix *points = new_matrix(4, step * step);
+    int rotation, circle;
     double phi, theta;
     double x, y, z;
-    double dt = M_PI / step;
-    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    for (rotation = 0; rotation < step; rotation++)
     {
-        for (theta = 0; theta < M_PI; theta += dt)
+        phi = 2 * M_PI * (double)rotation / step;
+        for (circle = 0; circle <= step; circle++)
         {
+            theta = M_PI * (double)circle / step;
             x = r * cos(theta) + cx;
             y = r * sin(theta) * cos(phi) + cy;
             z = r * sin(theta) * sin(phi);
-            add_edge(polygons, x, y, z, x, y, z);
+            add_point(points, x, y, z);
         }
     }
+    return points;
 }
 
 /*
@@ -33,19 +72,51 @@ void add_sphere(struct matrix *polygons, double cx, double cy, double cz, double
  */
 void add_torus(struct matrix *polygons, double cx, double cy, double cz, double r, double R, int step)
 {
+    struct matrix *points = generate_torus(cx, cy, cz, r, R, step);
+    int lat, lgt;
+    int p0, p1, p2, p3;
+    for (lat = 0; lat < step; lat++)
+    {
+        for (lgt = 0; lgt < step; lgt++)
+        {
+            p0 = lat * (step + 1) + lgt;
+            p1 = p0 + 1;
+            p2 = (p1 + step) % points->lastcol;
+            p3 = p2 + 1;
+            add_polygon(polygons, mt_idx(points, 0, p0), mt_idx(points, 1, p0), mt_idx(points, 2, p0),
+                                  mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            add_polygon(polygons, mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p3), mt_idx(points, 1, p3), mt_idx(points, 2, p3),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+        }
+    }
+    free_matrix(points);
+}
+
+/*
+ * Helper function to generate the points for a torus, with each cross section containing step + 1 points
+ * ([step] points for the circle, and an extra point to return back to the beginning point)
+ */
+struct matrix *generate_torus(double cx, double cy, double cz, double r, double R, int step)
+{
+    struct matrix *points = new_matrix(4, step * step);
+    int rotation, circle;
     double phi, theta;
     double x, y, z;
-    double dt = M_PI / step;
-    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    for (rotation = 0; rotation < step; rotation++)
     {
-        for (theta = 0; theta < 2 * M_PI; theta += dt)
+        phi = 2 * M_PI * (double)rotation / step;
+        for (circle = 0; circle <= step; circle++)
         {
+            theta = 2 * M_PI * (double)circle / step;
             x = r * cos(theta) + cx;
             y = (r * sin(theta) + R) * cos(phi) + cy;
             z = (r * sin(theta) + R) * sin(phi) + cz;
-            add_edge(polygons, x, y, z, x, y, z);
+            add_point(points, x, y, z);
         }
     }
+    return points;
 }
 
 /*
@@ -56,20 +127,20 @@ void add_box(struct matrix *polygons, double x, double y, double z, double dx, d
 {
     double x0 = x, y0 = y, z0 = z;
     double x1 = x + dx, y1 = y - dy, z1 = z - dz;
-    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x0, y1, z0);
-    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x0, y1, z0);
+    add_polygon(polygons, x0, y0, z0, x0, y1, z0, x1, y0, z0);
+    add_polygon(polygons, x1, y0, z0, x0, y1, z0, x1, y1, z0);
     add_polygon(polygons, x0, y0, z1, x1, y0, z1, x0, y1, z1);
     add_polygon(polygons, x1, y0, z1, x1, y1, z1, x0, y1, z1);
 
     add_polygon(polygons, x0, y0, z0, x1, y0, z0, x1, y0, z1);
     add_polygon(polygons, x1, y0, z1, x0, y0, z1, x0, y0, z0);
-    add_polygon(polygons, x0, y1, z0, x1, y1, z0, x1, y1, z1);
-    add_polygon(polygons, x1, y1, z1, x0, y1, z1, x0, y1, z0);
+    add_polygon(polygons, x0, y1, z0, x1, y1, z1, x1, y1, z0);
+    add_polygon(polygons, x1, y1, z1, x0, y1, z0, x0, y1, z1);
     
     add_polygon(polygons, x0, y0, z0, x0, y1, z1, x0, y1, z0);
     add_polygon(polygons, x0, y0, z0, x0, y0, z1, x0, y1, z1);
-    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y1, z0);
-    add_polygon(polygons, x1, y0, z0, x1, y0, z1, x1, y1, z1);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x1, y1, z1);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y0, z1);
 }
 
 /*
@@ -223,18 +294,26 @@ void draw_edges(struct matrix *edges, Image s, color c)
 void draw_polygons(struct matrix *polygons, Image s, color c)
 {
     int col;
-    int x0, y0, x1, y1, x2, y2;
+    double x0, y0, x1, y1, x2, y2;
+    double view[3] = {0, 0, 1};
+    double *normal;
     for (col = 0; col < polygons->lastcol; col += 3)
     {
-        x0 = mt_idx(polygons, 0, col);
-        y0 = mt_idx(polygons, 1, col);
-        x1 = mt_idx(polygons, 0, col + 1);
-        y1 = mt_idx(polygons, 1, col + 1);
-        x2 = mt_idx(polygons, 0, col + 2);
-        y2 = mt_idx(polygons, 1, col + 2);
-        draw_line(x0, y0, x1, y1, s, c);
-        draw_line(x1, y1, x2, y2, s, c);
-        draw_line(x2, y2, x0, y0, s, c);
+        /* Backface culling */
+        normal = calculate_normal(polygons, col);
+        if (dot_product(view, normal) >= 0)
+        {
+            x0 = mt_idx(polygons, 0, col);
+            y0 = mt_idx(polygons, 1, col);
+            x1 = mt_idx(polygons, 0, col + 1);
+            y1 = mt_idx(polygons, 1, col + 1);
+            x2 = mt_idx(polygons, 0, col + 2);
+            y2 = mt_idx(polygons, 1, col + 2);
+            draw_line(x0, y0, x1, y1, s, c);
+            draw_line(x1, y1, x2, y2, s, c);
+            draw_line(x2, y2, x0, y0, s, c);
+        }
+        free(normal);
     }
 }
 void plot(int x, int y, Image s, color c)

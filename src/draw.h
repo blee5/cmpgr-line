@@ -11,8 +11,10 @@
 #define HERMITE 0
 #define BEZIER 1
 
-void add_torus(struct matrix *polygons, double cx, double cy, double cz, double r, double R, int step);
 void add_sphere(struct matrix *polygons, double cx, double cy, double cz, double r, int step);
+struct matrix *generate_sphere(double cx, double cy, double cz, double r, int step);
+void add_torus(struct matrix *polygons, double cx, double cy, double cz, double r, double R, int step);
+struct matrix *generate_torus(double cx, double cy, double cz, double r, double R, int step);
 void add_box(struct matrix *polygons, double x, double y, double z, double dx, double dy, double dz);
 void add_cubic_curve(struct matrix *edges, double ax, double bx, double cx, double dx,
                                             double ay, double by, double cy, double dy, double step);

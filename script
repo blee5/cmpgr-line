@@ -1,10 +1,37 @@
-#test box mesh
-box
-200 200 0 200 100 400
+torus
+250 250 0 70 150
+/* sphere */
+/* 250 250 0 150 */
+display
+
 ident
+translate
+-250 -250 0
 rotate
-x 20
+y -30
 rotate
-y 20
+x -30
+translate
+250 250 0
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
+apply
+display
 apply
 display
