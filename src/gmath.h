@@ -9,4 +9,3 @@ double *cross_product(double *a, double *b);
 double *calculate_normal(struct matrix *points, int index);
 
 #endif
-
