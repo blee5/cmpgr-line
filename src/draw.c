@@ -6,73 +6,147 @@
 #include "image.h"
 #include "imageio.h"
 #include "matrix.h"
+#include "gmath.h"
 
 /*
  * Adds a sphere centered at (cx, cy, cz) with radius r
  */
-void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, int step)
+void add_sphere(struct matrix *polygons, double cx, double cy, double cz, double r, int step)
 {
+    struct matrix *points = generate_sphere(cx, cy, cz, r, step);
+    int lat, lgt;
+    int p0, p1, p2, p3;
+    for (lat = 0; lat < step; lat++)
+    {
+        for (lgt = 0; lgt < step; lgt++)
+        {
+            p0 = lat * (step + 1) + lgt;
+            p1 = p0 + 1;
+            p2 = (p1 + step) % points->lastcol;
+            /* If drawing the polygon for the first pole, shift the vertex otherwise p2 == p0 */
+            if (lgt == 0)
+                p2++;
+            add_polygon(polygons, mt_idx(points, 0, p0), mt_idx(points, 1, p0), mt_idx(points, 2, p0),
+                                  mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            /* Draw another triangle to make a quadrilateral, if we aren't at a pole */
+            if (lgt > 0 && lgt < step - 1)
+            {
+                p3 = p2 + 1;
+                add_polygon(polygons, mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                      mt_idx(points, 0, p3), mt_idx(points, 1, p3), mt_idx(points, 2, p3),
+                                      mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            }
+        }
+    }
+    free_matrix(points);
+}
+
+/*
+ * Helper function to generate points on a sphere, with (step + 1) points per semicircle
+ */
+struct matrix *generate_sphere(double cx, double cy, double cz, double r, int step)
+{
+    struct matrix *points = new_matrix(4, step * step);
+    int rotation, circle;
     double phi, theta;
     double x, y, z;
-    double dt = M_PI / step;
-    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    for (rotation = 0; rotation < step; rotation++)
     {
-        for (theta = 0; theta < M_PI; theta += dt)
+        phi = 2 * M_PI * (double)rotation / step;
+        for (circle = 0; circle <= step; circle++)
         {
+            theta = M_PI * (double)circle / step;
             x = r * cos(theta) + cx;
             y = r * sin(theta) * cos(phi) + cy;
             z = r * sin(theta) * sin(phi);
-            add_edge(points, x, y, z, x, y, z);
+            add_point(points, x, y, z);
         }
     }
+    return points;
 }
 
 /*
  * Adds a torus centered at (cx, cy, cz) with radius R,
  * with each cross section having radius r
  */
-void add_torus(struct matrix *points, double cx, double cy, double cz, double r, double R, int step)
+void add_torus(struct matrix *polygons, double cx, double cy, double cz, double r, double R, int step)
 {
-    double phi, theta;
-    double x, y, z;
-    double dt = M_PI / step;
-    for (phi = 0; phi < 2 * M_PI; phi += dt)
+    struct matrix *points = generate_torus(cx, cy, cz, r, R, step);
+    int lat, lgt;
+    int p0, p1, p2, p3;
+    for (lat = 0; lat < step; lat++)
     {
-        for (theta = 0; theta < 2 * M_PI; theta += dt)
+        for (lgt = 0; lgt < step; lgt++)
         {
-            x = r * cos(theta) + cx;
-            y = (r * sin(theta) + R) * cos(phi) + cy;
-            z = (r * sin(theta) + R) * sin(phi) + cz;
-            add_edge(points, x, y, z, x, y, z);
+            p0 = lat * (step + 1) + lgt;
+            p1 = p0 + 1;
+            p2 = (p1 + step) % points->lastcol;
+            p3 = p2 + 1;
+            add_polygon(polygons, mt_idx(points, 0, p0), mt_idx(points, 1, p0), mt_idx(points, 2, p0),
+                                  mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
+            add_polygon(polygons, mt_idx(points, 0, p1), mt_idx(points, 1, p1), mt_idx(points, 2, p1),
+                                  mt_idx(points, 0, p3), mt_idx(points, 1, p3), mt_idx(points, 2, p3),
+                                  mt_idx(points, 0, p2), mt_idx(points, 1, p2), mt_idx(points, 2, p2));
         }
     }
+    free_matrix(points);
+}
+
+/*
+ * Helper function to generate the points for a torus, with each cross section containing step + 1 points
+ * ([step] points for the circle, and an extra point to return back to the beginning point)
+ */
+struct matrix *generate_torus(double cx, double cy, double cz, double r, double R, int step)
+{
+    struct matrix *points = new_matrix(4, step * step);
+    int rotation, circle;
+    double phi, theta;
+    double x, y, z;
+    for (rotation = 0; rotation < step; rotation++)
+    {
+        phi = 2 * M_PI * (double)rotation / step;
+        for (circle = 0; circle <= step; circle++)
+        {
+            theta = 2 * M_PI * (double)circle / step;
+            x = (r * cos(theta) + R) * cos(phi) + cx;
+            y = r * sin(theta) + cy;
+            z = (r * cos(theta) + R) * sin(phi) + cz;
+            add_point(points, x, y, z);
+        }
+    }
+    return points;
 }
 
 /*
  * Adds a box with the top left vertex located at (x, y, z)
+ * with width dx, height dy, and depth dz
  */
-void add_box(struct matrix *points, double x, double y, double z, double dx, double dy, double dz)
+void add_box(struct matrix *polygons, double x, double y, double z, double dx, double dy, double dz)
 {
-    add_edge(points, x, y, z, x + dx, y, z);
-    add_edge(points, x + dx, y, z, x + dx, y - dy, z);
-    add_edge(points, x + dx, y - dy, z, x, y - dy, z);
-    add_edge(points, x, y - dy, z, x, y, z);
+    double x0 = x, y0 = y, z0 = z;
+    double x1 = x + dx, y1 = y - dy, z1 = z - dz;
+    add_polygon(polygons, x0, y0, z0, x0, y1, z0, x1, y0, z0);
+    add_polygon(polygons, x1, y0, z0, x0, y1, z0, x1, y1, z0);
+    add_polygon(polygons, x0, y0, z1, x1, y0, z1, x0, y1, z1);
+    add_polygon(polygons, x1, y0, z1, x1, y1, z1, x0, y1, z1);
 
-    add_edge(points, x, y, z - dz, x + dx, y, z - dz);
-    add_edge(points, x + dx, y, z - dz, x + dx, y - dy, z - dz);
-    add_edge(points, x + dx, y - dy, z - dz, x, y - dy, z - dz);
-    add_edge(points, x, y - dy, z - dz, x, y, z - dz);
-
-    add_edge(points, x, y, z, x, y, z - dz);
-    add_edge(points, x, y - dy, z, x, y - dy, z - dz);
-    add_edge(points, x + dx, y, z, x + dx, y, z - dz);
-    add_edge(points, x + dx, y - dy, z, x + dx, y - dy, z - dz);
+    add_polygon(polygons, x0, y0, z0, x1, y0, z0, x1, y0, z1);
+    add_polygon(polygons, x1, y0, z1, x0, y0, z1, x0, y0, z0);
+    add_polygon(polygons, x0, y1, z0, x1, y1, z1, x1, y1, z0);
+    add_polygon(polygons, x1, y1, z1, x0, y1, z0, x0, y1, z1);
+    
+    add_polygon(polygons, x0, y0, z0, x0, y1, z1, x0, y1, z0);
+    add_polygon(polygons, x0, y0, z0, x0, y0, z1, x0, y1, z1);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z0, x1, y1, z1);
+    add_polygon(polygons, x1, y0, z0, x1, y1, z1, x1, y0, z1);
 }
 
 /*
  * Adds a circle centered at (cx, cy, cz) with radius r
  */
-void add_circle(struct matrix *points, double cx, double cy, double cz, double r, double step)
+void add_circle(struct matrix *edges, double cx, double cy, double cz, double r, double step)
 {
     double x0, y0, x1, y1;
     double t = 0, theta = 0;
@@ -85,7 +159,7 @@ void add_circle(struct matrix *points, double cx, double cy, double cz, double r
         theta = t * M_PI * 2;
         x1 = cx + r * cos(theta);
         y1 = cy + r * sin(theta);
-        add_edge(points, x0, y0, cz, x1, y1, cz);
+        add_edge(edges, x0, y0, cz, x1, y1, cz);
     }
 }
 
@@ -94,25 +168,27 @@ void add_circle(struct matrix *points, double cx, double cy, double cz, double r
  *     x = ax t^3 + bx t^2 + cx t + dx
  *     y = ay t^3 + bx t^2 + cx t + dx
  */
-void add_cubic_curve(struct matrix *points, double ax, double bx, double cx, double dx,
+void add_cubic_curve(struct matrix *edges, double ax, double bx, double cx, double dx,
                                             double ay, double by, double cy, double dy, double step)
 {
-    double xp0, yp0, xp1, yp1, t = 0;
+    double x0, y0, x1, y1, t = 0;
+    x0 = (ax * t * t * t) + (bx * t * t) + cx * t + dx;
+    y0 = (ay * t * t * t) + (by * t * t) + cy * t + dy;
     while (t < 1)
     {
-        xp0 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
-        yp0 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
         t += step;
-        xp1 = ax * pow(t, 3) + bx * pow(t, 2) + cx * t + dx;
-        yp1 = ay * pow(t, 3) + by * pow(t, 2) + cy * t + dy;
-        add_edge(points, xp0, yp0, 0, xp1, yp1, 0);
+        x1 = (ax * t * t * t) + (bx * t * t) + cx * t + dx;
+        y1 = (ay * t * t * t) + (by * t * t) + cy * t + dy;
+        add_edge(edges, x0, y0, 0, x1, y1, 0);
+        x0 = x1;
+        y0 = y1;
     }
 }
 
 /*
- * Adds a cubic Bezier curve defined with given points, where (x0, y0) and (x3, y3) are endpoints
+ * Adds a cubic Bezier curve defined with given edges, where (x0, y0) and (x3, y3) are endedges
  */
-void add_bezier(struct matrix *points, double x0, double y0, double x1, double y1,
+void add_bezier(struct matrix *edges, double x0, double y0, double x1, double y1,
                                        double x2, double y2, double x3, double y3, double step)
 {
     /* Parametric equation coefficients */
@@ -124,13 +200,13 @@ void add_bezier(struct matrix *points, double x0, double y0, double x1, double y
     double by = 3 * y0 - 6 * y1 + 3 * y2;
     double cy = -3 * y0 + 3 * y1;
     double dy = y0;
-    add_cubic_curve(points, ax, bx, cx, dx, ay, by, cy, dy, step);
+    add_cubic_curve(edges, ax, bx, cx, dx, ay, by, cy, dy, step);
 }
 
 /*
- * Adds a Hermite curve defined with given points, where (x0, y0) and (x1, y1) are endpoints
+ * Adds a Hermite curve defined with given edges, where (x0, y0) and (x1, y1) are endedges
  */
-void add_hermite(struct matrix *points, double x0, double y0, double x1, double y1,
+void add_hermite(struct matrix *edges, double x0, double y0, double x1, double y1,
                                         double x2, double y2, double x3, double y3, double step)
 {
     /* Parametric equation coefficients */
@@ -142,7 +218,7 @@ void add_hermite(struct matrix *points, double x0, double y0, double x1, double 
     double by = -3 * y0 + 3 * y1 + -2 * y2 + -y3;
     double cy = y2;
     double dy = y0;
-    add_cubic_curve(points, ax, bx, cx, dx, ay, by, cy, dy, step);
+    add_cubic_curve(edges, ax, bx, cx, dx, ay, by, cy, dy, step);
 }
 
 /*
@@ -170,35 +246,76 @@ void add_point(struct matrix *m, double x, double y, double z)
 }
 
 /*
- * Adds a line connecting (x0, y0, z0) to (x1, y1, z1) to points.
+ * Adds a line connecting (x0, y0, z0) to (x1, y1, z1) to edges.
  * The matrix MUST have exactly 4 rows.
  */
-void add_edge(struct matrix *points,
+void add_edge(struct matrix *edges,
               double x0, double y0, double z0,
               double x1, double y1, double z1)
 {
-    add_point(points, x0, y0, z0);
-    add_point(points, x1, y1, z1);
+    add_point(edges, x0, y0, z0);
+    add_point(edges, x1, y1, z1);
 }
 
 /*
- * Goes through points 2 at a time and draws lines connecting the points.
+ * Add a polygon to the polygon matrix
+ */
+void add_polygon(struct matrix *polygons,
+                 double x0, double y0, double z0,
+                 double x1, double y1, double z1,
+                 double x2, double y2, double z2)
+{
+    add_point(polygons, x0, y0, z0);
+    add_point(polygons, x1, y1, z1);
+    add_point(polygons, x2, y2, z2);
+}
+
+/*
+ * Goes through edges 2 at a time and draws lines connecting the edges.
  * The matrix should obviously have an even number of columns.
  */
-void draw_lines(struct matrix *points, Image s, color c)
+void draw_edges(struct matrix *edges, Image s, color c)
 {
     int col;
     int x0, y0, x1, y1;
-    for (col = 0; col < points->lastcol; col += 2)
+    for (col = 0; col < edges->lastcol; col += 2)
     {
-        x0 = mt_idx(points, 0, col);
-        y0 = mt_idx(points, 1, col);
-        x1 = mt_idx(points, 0, col + 1);
-        y1 = mt_idx(points, 1, col + 1);
+        x0 = mt_idx(edges, 0, col);
+        y0 = mt_idx(edges, 1, col);
+        x1 = mt_idx(edges, 0, col + 1);
+        y1 = mt_idx(edges, 1, col + 1);
         draw_line(x0, y0, x1, y1, s, c);
     }
 }
 
+/*
+ * Draw the polygons from the polygon matrix
+ */
+void draw_polygons(struct matrix *polygons, Image s, color c)
+{
+    int col;
+    double x0, y0, x1, y1, x2, y2;
+    double view[3] = {0, 0, 1};
+    double *normal;
+    for (col = 0; col < polygons->lastcol; col += 3)
+    {
+        /* Backface culling */
+        normal = calculate_normal(polygons, col);
+        if (dot_product(view, normal) >= 0)
+        {
+            x0 = mt_idx(polygons, 0, col);
+            y0 = mt_idx(polygons, 1, col);
+            x1 = mt_idx(polygons, 0, col + 1);
+            y1 = mt_idx(polygons, 1, col + 1);
+            x2 = mt_idx(polygons, 0, col + 2);
+            y2 = mt_idx(polygons, 1, col + 2);
+            draw_line(x0, y0, x1, y1, s, c);
+            draw_line(x1, y1, x2, y2, s, c);
+            draw_line(x2, y2, x0, y0, s, c);
+        }
+        free(normal);
+    }
+}
 void plot(int x, int y, Image s, color c)
 {
     /* NOTE: (0, 0) is the bottom left corner */

@@ -46,6 +46,7 @@ The file follows the following format:
 void parse_file(char *filename, 
                 struct matrix *transform, 
                 struct matrix *edges,
+                struct matrix *polygons,
                 Image s)
 {
     FILE *f;
@@ -98,21 +99,21 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf %lf",
                          &x0, &y0, &z0, &x1, &y1, &z1);
-            add_box(edges, x0, y0, z0, x1, y1, z1);
+            add_box(polygons, x0, y0, z0, x1, y1, z1);
         }
         else if (strcmp(line, "sphere") == 0)
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf",
                          &x0, &y0, &z0, &r);
-            add_sphere(edges, x0, y0, z0, r, r * 0.5);
+            add_sphere(polygons, x0, y0, z0, r, 3 * sqrt(r));
         }
         else if (strcmp(line, "torus") == 0)
         {
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf",
                          &x0, &y0, &z0, &r, &R);
-            add_torus(edges, x0, y0, z0, r, R, r * 0.5);
+            add_torus(polygons, x0, y0, z0, r, R, 4 * sqrt(r));
         }
         else if (strcmp(line, "bezier") == 0)
         {
@@ -159,6 +160,7 @@ void parse_file(char *filename,
         else if (strcmp(line, "apply") == 0)
         {
             matrix_mult(transform, edges);
+            matrix_mult(transform, polygons);
         }
         else if (strcmp(line, "ident") == 0)
         {
@@ -167,25 +169,28 @@ void parse_file(char *filename,
         }
         else if (strcmp(line, "clear") == 0)
         {
-            free_matrix(edges);
-            edges = new_matrix(4, 0);
+            edges->lastcol = 0;
+            polygons->lastcol = 0;
         }
         else if (strcmp(line, "display") == 0)
         {
             clear_image(s);
-            draw_lines(edges, s, c);
+            draw_edges(edges, s, c);
+            draw_polygons(polygons, s, c);
             display(s);
         }
         else if (strcmp(line, "save") == 0)
         {
             fgets(line, 255, f);
             clear_image(s);
-            draw_lines(edges, s, c);
+            draw_edges(edges, s, c);
+            draw_polygons(polygons, s, c);
             save_image(s, line);
         }
         else if (strcmp(line, "quit") == 0)
         {
             free_matrix(edges);
+            free_matrix(polygons);
             free_matrix(transform);
             free(s);
             exit(0);

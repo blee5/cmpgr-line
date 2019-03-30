@@ -12,11 +12,12 @@ int main(int argc, char *argv[])
 {
     Image *s = init_image();
 
-    struct matrix *edges;
+    struct matrix *edges, *polygons;
     struct matrix *transform;
     char *script;
 
     edges = new_matrix(4, 0);
+    polygons = new_matrix(4, 0);
     transform = new_matrix(4, 4);
 
     script = "stdin";
@@ -25,6 +26,6 @@ int main(int argc, char *argv[])
         script = argv[1];
     }
 
-    parse_file(script, transform, edges, *s);
+    parse_file(script, transform, edges, polygons, *s);
     free(s);
 }
