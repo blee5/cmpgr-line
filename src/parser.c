@@ -173,9 +173,6 @@ void parse_file(char *filename,
         else if (strcmp(line, "save") == 0)
         {
             fgets(line, 255, f);
-            clear_image(s);
-            draw_edges(edges, s, c);
-            draw_polygons(polygons, s, c);
             save_image(s, line);
         }
         else if (strcmp(line, "quit") == 0)
