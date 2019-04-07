@@ -178,12 +178,12 @@ void grow_matrix(struct matrix *m, int newcols)
 }
 
 /*
- * Copies a matrix.
+ * Returns a copy of a matrix.
  */
 void copy_matrix(struct matrix *src, struct matrix *dest)
 {
-    memcpy(dest->mat, src->mat, src->rows * src->lastcol * sizeof (double));
     dest->rows = src->rows;
     dest->cols = src->cols;
     dest->lastcol = src->lastcol;
+    memcpy(dest->mat, src->mat, src->rows * src->cols * sizeof (double));
 }
