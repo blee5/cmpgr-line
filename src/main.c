@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
     Image *s = init_image();
 
     struct matrix *edges, *polygons;
-    struct matrix *transform;
     char *script;
 
     edges = new_matrix(4, 0);
