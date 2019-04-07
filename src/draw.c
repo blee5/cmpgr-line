@@ -186,7 +186,7 @@ void add_cubic_curve(struct matrix *edges, double ax, double bx, double cx, doub
 }
 
 /*
- * Adds a cubic Bezier curve defined with given edges, where (x0, y0) and (x3, y3) are endedges
+ * Adds a cubic Bezier curve defined with given points, where (x0, y0) and (x3, y3) are endpoints
  */
 void add_bezier(struct matrix *edges, double x0, double y0, double x1, double y1,
                                        double x2, double y2, double x3, double y3, double step)
@@ -204,7 +204,7 @@ void add_bezier(struct matrix *edges, double x0, double y0, double x1, double y1
 }
 
 /*
- * Adds a Hermite curve defined with given edges, where (x0, y0) and (x1, y1) are endedges
+ * Adds a Hermite curve defined with given points, where (x0, y0) and (x1, y1) are endpoints
  */
 void add_hermite(struct matrix *edges, double x0, double y0, double x1, double y1,
                                         double x2, double y2, double x3, double y3, double step)
