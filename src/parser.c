@@ -124,7 +124,7 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf",
                          &x0, &y0, &z0, &r, &R);
-            add_torus(polygons, x0, y0, z0, r, R, 3 * sqrt(r));
+            add_torus(polygons, x0, y0, z0, r, R, 0.5 * sqrt(r) * sqrt(R));
             matrix_mult(peek(stack), polygons);
             draw_polygons(polygons, s, zb, c);
             polygons->lastcol = 0;
