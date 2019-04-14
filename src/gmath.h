@@ -6,6 +6,6 @@
 void normalize(double *vector);
 double dot_product(double *a, double *b);
 double *cross_product(double *a, double *b);
-double *calculate_normal(struct matrix *points, int index);
+double *calculate_normal(struct matrix *points, int i);
 
 #endif

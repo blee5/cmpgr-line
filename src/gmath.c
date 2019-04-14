@@ -39,21 +39,17 @@ double *cross_product(double *a, double *b)
     return res;
 }
 
-double *calculate_normal(struct matrix *points, int index)
+/*
+ * Calculates the normal for a polygon at the i-th column
+ */
+double *calculate_normal(struct matrix *points, int i)
 {
     double v0[3], v1[3];
     double x0, y0, z0, x1, y1, z1, x2, y2, z2;
-    x0 = mt_idx(points, 0, index);
-    y0 = mt_idx(points, 1, index);
-    z0 = mt_idx(points, 2, index);
-
-    x1 = mt_idx(points, 0, index + 1);
-    y1 = mt_idx(points, 1, index + 1);
-    z1 = mt_idx(points, 2, index + 1);
-
-    x2 = mt_idx(points, 0, index + 2);
-    y2 = mt_idx(points, 1, index + 2);
-    z2 = mt_idx(points, 2, index + 2);
+    double *p = &mt_idx(points, 0, i);
+    x0 = *(p++); y0 = *(p++); z0 = *(p++); p++;
+    x1 = *(p++); y1 = *(p++); z1 = *(p++); p++;
+    x2 = *(p++); y2 = *(p++); z2 = *(p++);
 
     v0[0] = x1 - x0; v0[1] = y1 - y0; v0[2] = z1 - z0;
     v1[0] = x2 - x0; v1[1] = y2 - y0; v1[2] = z2 - z0;

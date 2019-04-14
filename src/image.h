@@ -16,5 +16,6 @@ struct point_t
 typedef struct point_t color;
 
 typedef struct point_t Image[XRES][YRES];
+typedef double zbuffer[XRES][YRES];
 
 #endif

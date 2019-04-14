@@ -11,22 +11,23 @@
 #include "stack.h"
 
 /*======== void parse_file () ==========
-Inputs:   char * filename
-          struct matrix * transform,
-          struct matrix * pm,
+Inputs:   char *filename
+          struct matrix *edges,
+          struct matrix *polygons,
           screen s
 
 Goes through the file named filename and performs all of the actions listed in that file.
 ====================*/
 void parse_file(char *filename, 
-                struct matrix *transform, 
                 struct matrix *edges,
                 struct matrix *polygons,
-                Image s)
+                Image s,
+                zbuffer zb)
 {
     FILE *f;
     char line[256];
     struct stack *stack = new_stack();
+    struct matrix *transform;
 
     double x0, y0, z0, x1, y1, z1, x2, y2, x3, y3;
     double r, R;
@@ -66,7 +67,7 @@ void parse_file(char *filename,
             sscanf(line, "%lf %lf %lf %lf %lf %lf", &x0, &y0, &z0, &x1, &y1, &z1);
             add_edge(edges, x0, y0, z0, x1, y1, z1);
             matrix_mult(peek(stack), edges);
-            draw_edges(edges, s, c);
+            draw_edges(edges, s, zb, c);
             edges->lastcol = 0;
         }
         else if (strcmp(line, "circle") == 0)
@@ -75,7 +76,7 @@ void parse_file(char *filename,
             sscanf(line, "%lf %lf %lf %lf", &x0, &y0, &z0, &r);
             add_circle(edges, x0, y0, z0, r, 0.005);
             matrix_mult(peek(stack), edges);
-            draw_edges(edges, s, c);
+            draw_edges(edges, s, zb, c);
             edges->lastcol = 0;
         }
         else if (strcmp(line, "bezier") == 0)
@@ -85,7 +86,7 @@ void parse_file(char *filename,
                           &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
             add_bezier(edges, x0, y0, x1, y1, x2, y2, x3, y3, 0.005);
             matrix_mult(peek(stack), edges);
-            draw_edges(edges, s, c);
+            draw_edges(edges, s, zb, c);
             edges->lastcol = 0;
         }
         else if (strcmp(line, "hermite") == 0)
@@ -95,7 +96,7 @@ void parse_file(char *filename,
                           &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
             add_hermite(edges, x0, y0, x1, y1, x2, y2, x3, y3, 0.005);
             matrix_mult(peek(stack), edges);
-            draw_edges(edges, s, c);
+            draw_edges(edges, s, zb, c);
             edges->lastcol = 0;
         }
         else if (strcmp(line, "box") == 0)
@@ -105,7 +106,7 @@ void parse_file(char *filename,
                          &x0, &y0, &z0, &x1, &y1, &z1);
             add_box(polygons, x0, y0, z0, x1, y1, z1);
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, c);
+            draw_polygons(polygons, s, zb, c);
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "sphere") == 0)
@@ -113,9 +114,9 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf",
                          &x0, &y0, &z0, &r);
-            add_sphere(polygons, x0, y0, z0, r, 3 * sqrt(r));
+            add_sphere(polygons, x0, y0, z0, r, 2 * sqrt(r));
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, c);
+            draw_polygons(polygons, s, zb, c);
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "torus") == 0)
@@ -123,9 +124,9 @@ void parse_file(char *filename,
             fgets(line, 255, f);
             sscanf(line, "%lf %lf %lf %lf %lf",
                          &x0, &y0, &z0, &r, &R);
-            add_torus(polygons, x0, y0, z0, r, R, 4 * sqrt(r));
+            add_torus(polygons, x0, y0, z0, r, R, 3 * sqrt(r));
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, c);
+            draw_polygons(polygons, s, zb, c);
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "translate") == 0 || strcmp(line, "move") == 0)
@@ -169,6 +170,11 @@ void parse_file(char *filename,
         else if (strcmp(line, "display") == 0)
         {
             display(s);
+        }
+        else if (strcmp(line, "clear") == 0)
+        {
+            clear_zbuffer(zb);
+            clear_image(s);
         }
         else if (strcmp(line, "save") == 0)
         {
