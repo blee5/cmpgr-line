@@ -150,7 +150,7 @@ struct matrix *generate_sphere(double cx, double cy, double cz, double r, int st
             theta = M_PI * (double)circle / step;
             x = r * cos(theta) + cx;
             y = r * sin(theta) * cos(phi) + cy;
-            z = r * sin(theta) * sin(phi);
+            z = r * sin(theta) * sin(phi) + cz;
             add_point(points, x, y, z);
         }
     }
