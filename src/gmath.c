@@ -3,9 +3,75 @@
 
 #include "gmath.h"
 
-/*
- * NOTE: ALL VECTORS ARE ASSUMED TO BE 3D
- */
+int clip(int n, int max)
+{
+    return n < max? n: max;
+}
+
+color get_lighting(double *normal, double *view, color a_light, double light[2][3],
+                   double *a_reflect, double *d_reflect, double *s_reflect)
+{
+    color a = calculate_ambient(a_light, a_reflect);
+    color d = calculate_diffuse(light, d_reflect, normal);
+    color s = calculate_specular(light, s_reflect, view, normal);
+
+    color il;
+    il.r = clip(a.r + d.r + s.r, 255);
+    il.g = clip(a.g + d.g + s.g, 255);
+    il.b = clip(a.b + d.b + s.b, 255);
+    return il;
+}
+
+color calculate_ambient(color a_light, double *a_reflect)
+{
+    a_light.r *= a_reflect[RED];
+    a_light.g *= a_reflect[GREEN];
+    a_light.b *= a_reflect[BLUE];
+    return a_light;
+}
+
+color calculate_diffuse(double light[2][3], double *d_reflect, double *normal)
+{
+    color c;
+    c.r = c.g = c.b = 0;
+    normalize(normal);
+    normalize(light[LOCATION]);
+    double reflect_val = dot_product(normal, light[LOCATION]);
+    if (reflect_val < 0)
+        return c;
+    double r = reflect_val * d_reflect[RED] * light[COLOR][RED]; 
+    double g = reflect_val * d_reflect[GREEN] * light[COLOR][GREEN]; 
+    double b = reflect_val * d_reflect[BLUE] * light[COLOR][BLUE]; 
+    c.r = clip(r, 255);
+    c.g = clip(g, 255);
+    c.b = clip(b, 255);
+    return c;
+}
+
+color calculate_specular(double light[2][3], double *s_reflect, double *view, double *normal)
+{
+    color c;
+    c.r = c.g = c.b = 0;
+    double r, g, b;
+    normalize(normal);
+    normalize(light[LOCATION]);
+    normalize(view);
+
+    double reflect_val = dot_product(normal, light[LOCATION]);
+    if (reflect_val < 0)
+        return c;
+    for (int i = 0; i < 3; i++)
+        normal[i] = 2 * reflect_val * normal[i] - light[LOCATION][i];
+    reflect_val = pow(dot_product(normal, view), 30);
+    r = reflect_val * s_reflect[RED] * light[COLOR][RED];
+    g = reflect_val * s_reflect[GREEN] * light[COLOR][GREEN];
+    b = reflect_val * s_reflect[BLUE] * light[COLOR][BLUE]; 
+
+    c.r = clip(r, 255);
+    c.g = clip(g, 255);
+    c.b = clip(b, 255);
+    return c;
+}
 
 
 /*

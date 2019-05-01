@@ -6,6 +6,8 @@
 #define MAX_COLOR 255
 #define DEFAULT_COLOR 0
 
+#define NUM_POLY 1000
+
 struct point_t
 {
     unsigned char r;

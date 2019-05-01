@@ -11,16 +11,13 @@
 /*
  * Fills the ith polygon with horizontal lines
  */
-void scanline_convert(struct matrix *polygons, int i, Image s, zbuffer zb)
+void scanline_convert(struct matrix *polygons, int i, Image s, zbuffer zb, color il)
 {
     double x0, y0, z0, x1, y1, z1, x2, y2, z2;
     double tx, tz, mx, mz, bx, bz;
     /* y values are int (important) */
     int ty, my, by;
     double *p;
-
-    color c;
-    c.r = random() % 220 + 30; c.g = random() % 220 + 30; c.b = random() % 220 + 30;
 
     /* Unnecessarily obtuse code for reading three points */
     p = &mt_idx(polygons, 0, i * 3);
@@ -93,7 +90,7 @@ void scanline_convert(struct matrix *polygons, int i, Image s, zbuffer zb)
             dz1 = ty - my? (tz - mz) / (ty - my): 0;
             x1 = mx; z1 = mz;
         }
-        draw_line(x0, y, z0, x1, y, z1, s, zb, c);
+        draw_line(x0, y, z0, x1, y, z1, s, zb, il);
         x0 += dx0; x1 += dx1;
         z0 += dz0; z1 += dz1;
     }
@@ -313,10 +310,10 @@ void add_hermite(struct matrix *edges, double x0, double y0, double x1, double y
 }
 
 /*
- * Adds a column to the matrix.
+ * Adds point (x, y, z) to the matrix.
  * The matrix MUST have exactly 4 rows.
  */
-void add_column(struct matrix *m, double a, double b, double c, double d)
+void add_point(struct matrix *m, double x, double y, double z)
 {
     if (m->lastcol == m->cols)
     {
@@ -324,16 +321,7 @@ void add_column(struct matrix *m, double a, double b, double c, double d)
     }
     double *p = &mt_idx(m, 0, m->lastcol);
     m->lastcol++;
-    *p++ = a; *p++ = b; *p++ = c; *p = d;
-}
-
-/*
- * Adds point (x, y, z) to the matrix.
- * The matrix MUST have exactly 4 rows.
- */
-void add_point(struct matrix *m, double x, double y, double z)
-{
-    add_column(m, x, y, z, 1);
+    *p++ = x; *p++ = y; *p++ = z; *p = 1;
 }
 
 /*
@@ -384,17 +372,23 @@ void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
 /*
  * Draw the polygons from the polygon matrix
  */
-void draw_polygons(struct matrix *polygons, Image s, zbuffer zb)
+void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
+                   double *view, double light[2][3], color ambient,
+                   double *a_reflect, double *d_reflect, double *s_reflect)
 {
     int col;
-    double view[3] = {0, 0, 1};
     double *normal;
     for (col = 0; col < polygons->lastcol; col += 3)
     {
         /* Backface culling */
         normal = calculate_normal(polygons, col);
         if (dot_product(view, normal) > 0)
-            scanline_convert(polygons, col / 3, s, zb);
+        {
+            color i = get_lighting(normal, view, ambient, light, a_reflect, d_reflect, s_reflect);
+            
+            /* display(s); */
+            scanline_convert(polygons, col / 3, s, zb, i);
+        }
         free(normal);
     }
 }
