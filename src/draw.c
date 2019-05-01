@@ -384,7 +384,7 @@ void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
 /*
  * Draw the polygons from the polygon matrix
  */
-void draw_polygons(struct matrix *polygons, Image s, zbuffer zb, color c)
+void draw_polygons(struct matrix *polygons, Image s, zbuffer zb)
 {
     int col;
     double view[3] = {0, 0, 1};

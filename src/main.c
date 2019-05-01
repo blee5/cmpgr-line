@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "draw.h"
 #include "image.h"
@@ -20,8 +19,6 @@ int main(int argc, char *argv[])
     edges = new_matrix(4, 0);
     polygons = new_matrix(4, 0);
 
-    /* srand(time(NULL)); */
-
     script = "stdin";
     if (argc == 2)
     {
@@ -30,4 +27,6 @@ int main(int argc, char *argv[])
 
     parse_file(script, edges, polygons, *s, *zb);
     free(s);
+
+    return EXIT_SUCCESS;
 }
