@@ -63,12 +63,11 @@ color calculate_specular(double light[2][3], double *s_reflect, double *view, do
     for (int i = 0; i < 3; i++)
         reflection[i] = 2 * diffuse * normal[i] - light[LOCATION][i];
     double specular = pow(dot_product(reflection, view), SHINYNESS);
+    if (specular < 0)
+        return c;
     r = specular * s_reflect[RED] * light[COLOR][RED];
     g = specular * s_reflect[GREEN] * light[COLOR][GREEN];
     b = specular * s_reflect[BLUE] * light[COLOR][BLUE]; 
-    if (r < 0) r = 0;
-    if (g < 0) g = 0;
-    if (b < 0) b = 0;
     c.r = r < 255? r: 255;
     c.g = g < 255? g: 255;
     c.b = b < 255? b: 255;
