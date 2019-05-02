@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "gmath.h"
+#include "image.h"
 
 color get_lighting(double *normal, double *view, color a_light, double light[2][3],
                    double *a_reflect, double *d_reflect, double *s_reflect)
@@ -14,9 +15,9 @@ color get_lighting(double *normal, double *view, color a_light, double light[2][
     int r = a.r + d.r + s.r;
     int g = a.g + d.g + s.g;
     int b = a.b + d.b + s.b;
-    il.r = r < 255? r: 255;
-    il.g = g < 255? g: 255;
-    il.b = b < 255? b: 255;
+    il.r = r < MAX_COLOR? r: MAX_COLOR;
+    il.g = g < MAX_COLOR? g: MAX_COLOR;
+    il.b = b < MAX_COLOR? b: MAX_COLOR;
     return il;
 }
 
@@ -41,9 +42,9 @@ color calculate_diffuse(double light[2][3], double *d_reflect, double *normal)
     r = diffuse * d_reflect[RED] * light[COLOR][RED];
     g = diffuse * d_reflect[GREEN] * light[COLOR][GREEN];
     b = diffuse * d_reflect[BLUE] * light[COLOR][BLUE];
-    c.r = r < 255? r: 255;
-    c.g = g < 255? g: 255;
-    c.b = b < 255? b: 255;
+    c.r = r < MAX_COLOR? r: MAX_COLOR;
+    c.g = g < MAX_COLOR? g: MAX_COLOR;
+    c.b = b < MAX_COLOR? b: MAX_COLOR;
     return c;
 }
 
@@ -68,9 +69,9 @@ color calculate_specular(double light[2][3], double *s_reflect, double *view, do
     r = specular * s_reflect[RED] * light[COLOR][RED];
     g = specular * s_reflect[GREEN] * light[COLOR][GREEN];
     b = specular * s_reflect[BLUE] * light[COLOR][BLUE]; 
-    c.r = r < 255? r: 255;
-    c.g = g < 255? g: 255;
-    c.b = b < 255? b: 255;
+    c.r = r < MAX_COLOR? r: MAX_COLOR;
+    c.g = g < MAX_COLOR? g: MAX_COLOR;
+    c.b = b < MAX_COLOR? b: MAX_COLOR;
     return c;
 }
 
