@@ -4,7 +4,7 @@
 #define XRES 500
 #define YRES 500
 #define MAX_COLOR 255
-#define DEFAULT_COLOR 45
+#define DEFAULT_COLOR 230
 
 int NUM_POLY;
 double SHINYNESS;
