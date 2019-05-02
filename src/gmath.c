@@ -3,11 +3,6 @@
 
 #include "gmath.h"
 
-int clip(int n, int max)
-{
-    return n < max? n: max;
-}
-
 color get_lighting(double *normal, double *view, color a_light, double light[2][3],
                    double *a_reflect, double *d_reflect, double *s_reflect)
 {
@@ -16,9 +11,12 @@ color get_lighting(double *normal, double *view, color a_light, double light[2][
     color s = calculate_specular(light, s_reflect, view, normal);
 
     color il;
-    il.r = clip(a.r + d.r + s.r, 255);
-    il.g = clip(a.g + d.g + s.g, 255);
-    il.b = clip(a.b + d.b + s.b, 255);
+    int r = a.r + d.r + s.r;
+    int g = a.g + d.g + s.g;
+    int b = a.b + d.b + s.b;
+    il.r = r < 255? r: 255;
+    il.g = g < 255? g: 255;
+    il.b = b < 255? b: 255;
     return il;
 }
 
@@ -33,18 +31,19 @@ color calculate_ambient(color a_light, double *a_reflect)
 color calculate_diffuse(double light[2][3], double *d_reflect, double *normal)
 {
     color c;
+    double r, g, b;
     c.r = c.g = c.b = 0;
     normalize(normal);
     normalize(light[LOCATION]);
-    double reflect_val = dot_product(normal, light[LOCATION]);
-    if (reflect_val < 0)
+    double diffuse = dot_product(normal, light[LOCATION]);
+    if (diffuse < 0)
         return c;
-    double r = reflect_val * d_reflect[RED] * light[COLOR][RED]; 
-    double g = reflect_val * d_reflect[GREEN] * light[COLOR][GREEN]; 
-    double b = reflect_val * d_reflect[BLUE] * light[COLOR][BLUE]; 
-    c.r = clip(r, 255);
-    c.g = clip(g, 255);
-    c.b = clip(b, 255);
+    r = diffuse * d_reflect[RED] * light[COLOR][RED];
+    g = diffuse * d_reflect[GREEN] * light[COLOR][GREEN];
+    b = diffuse * d_reflect[BLUE] * light[COLOR][BLUE];
+    c.r = r < 255? r: 255;
+    c.g = g < 255? g: 255;
+    c.b = b < 255? b: 255;
     return c;
 }
 
@@ -57,19 +56,22 @@ color calculate_specular(double light[2][3], double *s_reflect, double *view, do
     normalize(light[LOCATION]);
     normalize(view);
 
-    double reflect_val = dot_product(normal, light[LOCATION]);
-    if (reflect_val < 0)
+    double reflection[3];
+    double diffuse = dot_product(normal, light[LOCATION]);
+    if (diffuse < 0)
         return c;
     for (int i = 0; i < 3; i++)
-        normal[i] = 2 * reflect_val * normal[i] - light[LOCATION][i];
-    reflect_val = pow(dot_product(normal, view), SHINYNESS);
-    r = reflect_val * s_reflect[RED] * light[COLOR][RED];
-    g = reflect_val * s_reflect[GREEN] * light[COLOR][GREEN];
-    b = reflect_val * s_reflect[BLUE] * light[COLOR][BLUE]; 
-
-    c.r = clip(r, 255);
-    c.g = clip(g, 255);
-    c.b = clip(b, 255);
+        reflection[i] = 2 * diffuse * normal[i] - light[LOCATION][i];
+    double specular = pow(dot_product(reflection, view), SHINYNESS);
+    r = specular * s_reflect[RED] * light[COLOR][RED];
+    g = specular * s_reflect[GREEN] * light[COLOR][GREEN];
+    b = specular * s_reflect[BLUE] * light[COLOR][BLUE]; 
+    if (r < 0) r = 0;
+    if (g < 0) g = 0;
+    if (b < 0) b = 0;
+    c.r = r < 255? r: 255;
+    c.g = g < 255? g: 255;
+    c.b = b < 255? b: 255;
     return c;
 }
 

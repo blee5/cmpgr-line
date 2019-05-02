@@ -7,47 +7,47 @@ z 35
 rotate
 y 65
 
-push
-rotate
-z 0
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 0 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
-push
-rotate
-z 30
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 30 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
-push
-rotate
-z 60
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 60 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
-push
-rotate
-z 90
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 90 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
-push
-rotate
-z 120
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 120 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
-push
-rotate
-z 150
-torus
-0 0 0 15 150
-pop
+/* push */
+/* rotate */
+/* z 150 */
+/* torus */
+/* 0 0 0 15 150 */
+/* pop */
 
 sphere
 0 0 0 100

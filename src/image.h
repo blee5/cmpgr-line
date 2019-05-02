@@ -7,7 +7,7 @@
 #define DEFAULT_COLOR 45
 
 int NUM_POLY;
-int SHINYNESS;
+double SHINYNESS;
 
 struct point_t
 {

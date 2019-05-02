@@ -47,7 +47,7 @@ int read_config(double light[2][3], double *view, color ambient,
         else if (strcmp(line, "shinyness") == 0)
         {
             fgets(line, 255, f);
-            sscanf(line, "%d", &SHINYNESS);
+            sscanf(line, "%lf", &SHINYNESS);
         }
         else if (strcmp(line, "num_polygons") == 0)
         {
