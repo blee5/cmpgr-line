@@ -62,7 +62,7 @@ color calculate_specular(double light[2][3], double *s_reflect, double *view, do
         return c;
     for (int i = 0; i < 3; i++)
         normal[i] = 2 * reflect_val * normal[i] - light[LOCATION][i];
-    reflect_val = pow(dot_product(normal, view), 30);
+    reflect_val = pow(dot_product(normal, view), SHINYNESS);
     r = reflect_val * s_reflect[RED] * light[COLOR][RED];
     g = reflect_val * s_reflect[GREEN] * light[COLOR][GREEN];
     b = reflect_val * s_reflect[BLUE] * light[COLOR][BLUE]; 

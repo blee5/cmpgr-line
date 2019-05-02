@@ -51,7 +51,7 @@ pop
 
 sphere
 0 0 0 100
-/* display */
 
+display
 save
 out.png

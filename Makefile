@@ -5,7 +5,7 @@ TARGET_EXEC ?= main
 BUILD_DIR ?= build
 SRC_DIR ?= src
 
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -Wextra -O3 -Wno-unused-result
 LFLAGS := -lm
 
 SRCS := $(shell find $(SRC_DIR) -name "*.c")

@@ -4,9 +4,10 @@
 #define XRES 500
 #define YRES 500
 #define MAX_COLOR 255
-#define DEFAULT_COLOR 0
+#define DEFAULT_COLOR 45
 
-#define NUM_POLY 1000
+int NUM_POLY;
+int SHINYNESS;
 
 struct point_t
 {
