@@ -9,6 +9,94 @@
 #include "gmath.h"
 
 /*
+ * Fills the ith polygon with horizontal lines
+ */
+void scanline_convert(struct matrix *polygons, int i, Image s, zbuffer zb, color il)
+{
+    double x0, y0, z0, x1, y1, z1, x2, y2, z2;
+    double tx, tz, mx, mz, bx, bz;
+    /* y values are int (important) */
+    int ty, my, by;
+    double *p;
+
+    /* Unnecessarily obtuse code for reading three points */
+    p = &mt_idx(polygons, 0, i * 3);
+    x0 = *(p++); y0 = *(p++); z0 = *(p++); p++;
+    x1 = *(p++); y1 = *(p++); z1 = *(p++); p++;
+    x2 = *(p++); y2 = *(p++); z2 = *(p++);
+
+    /* Sort points */
+    if (y0 >= y1 && y0 >= y2)
+    {
+        tx = x0; ty = y0; tz = z0;
+        /* P0 >= P1 >= P2 */
+        if (y1 > y2)
+        {
+            mx = x1; my = y1; mz = z1;
+            bx = x2; by = y2; bz = z2;
+        }
+        /* P0 >= P2 >= P1 */
+        else
+        {
+            mx = x2; my = y2; mz = z2;
+            bx = x1; by = y1; bz = z1;
+        }
+    }
+    else if (y1 >= y0 && y1 >= y2)
+    {
+        tx = x1; ty = y1; tz = z1;
+        /* P1 >= P0 >= P2 */
+        if (y0 > y2)
+        {
+            mx = x0; my = y0; mz = z0;
+            bx = x2; by = y2; bz = z2;
+        }
+        /* P1 >= P2 >= P0 */
+        else
+        {
+            mx = x2; my = y2; mz = z2;
+            bx = x0; by = y0; bz = z0;
+        }
+    }
+    else
+    {
+        tx = x2; ty = y2; tz = z2;
+        /* P2 >= P0 >= P1 */
+        if (y0 > y1)
+        {
+            mx = x0; my = y0; mz = z0;
+            bx = x1; by = y1; bz = z1;
+        }
+        /* P2 >= P1 >= P0 */
+        else
+        {
+            mx = x1; my = y1; mz = z1;
+            bx = x0; by = y0; bz = z0;
+        }
+    }
+
+    double dx0 = ty - by? (tx - bx) / (ty - by): 0;
+    double dz0 = ty - by? (tz - bz) / (ty - by): 0;
+    double dx1 = my - by? (mx - bx) / (my - by): 0;
+    double dz1 = my - by? (mz - bz) / (my - by): 0;
+    x0 = x1 = bx;
+    z0 = z1 = bz;
+
+    for (int y = by; y <= ty; y++)
+    {
+        if (y == my)
+        {
+            dx1 = ty - my? (tx - mx) / (ty - my): 0;
+            dz1 = ty - my? (tz - mz) / (ty - my): 0;
+            x1 = mx; z1 = mz;
+        }
+        draw_line(x0, y, z0, x1, y, z1, s, zb, il);
+        x0 += dx0; x1 += dx1;
+        z0 += dz0; z1 += dz1;
+    }
+}
+
+/*
  * Adds a sphere centered at (cx, cy, cz) with radius r
  */
 void add_sphere(struct matrix *polygons, double cx, double cy, double cz, double r, int step)
@@ -59,7 +147,7 @@ struct matrix *generate_sphere(double cx, double cy, double cz, double r, int st
             theta = M_PI * (double)circle / step;
             x = r * cos(theta) + cx;
             y = r * sin(theta) * cos(phi) + cy;
-            z = r * sin(theta) * sin(phi);
+            z = r * sin(theta) * sin(phi) + cz;
             add_point(points, x, y, z);
         }
     }
@@ -222,10 +310,10 @@ void add_hermite(struct matrix *edges, double x0, double y0, double x1, double y
 }
 
 /*
- * Adds a column to the matrix.
+ * Adds point (x, y, z) to the matrix.
  * The matrix MUST have exactly 4 rows.
  */
-void add_column(struct matrix *m, double a, double b, double c, double d)
+void add_point(struct matrix *m, double x, double y, double z)
 {
     if (m->lastcol == m->cols)
     {
@@ -233,16 +321,7 @@ void add_column(struct matrix *m, double a, double b, double c, double d)
     }
     double *p = &mt_idx(m, 0, m->lastcol);
     m->lastcol++;
-    *p++ = a; *p++ = b; *p++ = c; *p = d;
-}
-
-/*
- * Adds point (x, y, z) to the matrix.
- * The matrix MUST have exactly 4 rows.
- */
-void add_point(struct matrix *m, double x, double y, double z)
-{
-    add_column(m, x, y, z, 1);
+    *p++ = x; *p++ = y; *p++ = z; *p = 1;
 }
 
 /*
@@ -274,78 +353,73 @@ void add_polygon(struct matrix *polygons,
  * Goes through edges 2 at a time and draws lines connecting the edges.
  * The matrix should obviously have an even number of columns.
  */
-void draw_edges(struct matrix *edges, Image s, color c)
+void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
 {
     int col;
-    int x0, y0, x1, y1;
+    int x0, y0, z0, x1, y1, z1;
     for (col = 0; col < edges->lastcol; col += 2)
     {
         x0 = mt_idx(edges, 0, col);
         y0 = mt_idx(edges, 1, col);
+        z0 = mt_idx(edges, 2, col);
         x1 = mt_idx(edges, 0, col + 1);
         y1 = mt_idx(edges, 1, col + 1);
-        draw_line(x0, y0, x1, y1, s, c);
+        z1 = mt_idx(edges, 2, col + 1);
+        draw_line(x0, y0, z0, x1, y1, z1, s, zb, c);
     }
 }
 
 /*
  * Draw the polygons from the polygon matrix
  */
-void draw_polygons(struct matrix *polygons, Image s, color c)
+void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
+                   double *view, double light[2][3], color ambient,
+                   double *a_reflect, double *d_reflect, double *s_reflect)
 {
     int col;
-    double x0, y0, x1, y1, x2, y2;
-    double view[3] = {0, 0, 1};
     double *normal;
     for (col = 0; col < polygons->lastcol; col += 3)
     {
         /* Backface culling */
         normal = calculate_normal(polygons, col);
-        if (dot_product(view, normal) >= 0)
+        if (dot_product(view, normal) > 0)
         {
-            x0 = mt_idx(polygons, 0, col);
-            y0 = mt_idx(polygons, 1, col);
-            x1 = mt_idx(polygons, 0, col + 1);
-            y1 = mt_idx(polygons, 1, col + 1);
-            x2 = mt_idx(polygons, 0, col + 2);
-            y2 = mt_idx(polygons, 1, col + 2);
-            draw_line(x0, y0, x1, y1, s, c);
-            draw_line(x1, y1, x2, y2, s, c);
-            draw_line(x2, y2, x0, y0, s, c);
+            color i = get_lighting(normal, view, ambient, light, a_reflect, d_reflect, s_reflect);
+            
+            /* display(s); */
+            scanline_convert(polygons, col / 3, s, zb, i);
         }
         free(normal);
     }
 }
-void plot(int x, int y, Image s, color c)
-{
-    /* NOTE: (0, 0) is the bottom left corner */
-    y = YRES - 1 - y;
-    if (x >= 0 && x < XRES && y >= 0 && y < YRES)
-    {
-        s[x][y] = c;
-    }
-}
 
-void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
+void draw_line(int x0, int y0, double z0,
+               int x1, int y1, double z1, Image s, zbuffer zb, color c)
 {
     int x, y;
     int dx, dy;
+    double z, dz;
     /* D = Ax + By + C, where A = dy, B = -dx, and C is irrelevant */
     int A, B, D;
+    /* Swap points to order them */
     if (x1 < x0)
     {
         int temp = x0;
         x0 = x1;
         x1 = temp;
-
         temp = y0;
         y0 = y1;
         y1 = temp;
+        temp = z0;
+        z0 = z1;
+        z1 = temp;
     }
     x = x0;
     y = y0;
+    z = z0;
     dx = x1 - x0;
     dy = y1 - y0;
+    dz = z1 - z0;
 
     /* Note everything is scaled by 2 to avoid the pesky floating point number 1/2 */
     A = dy * 2;
@@ -361,12 +435,13 @@ void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
         D = 2 * A + B;
         while (x <= x1)
         {
-            plot(x, y, s, c);
+            plot(x, y, z, s, zb, c);
             if (D > 0) // next midpoint is below the line
             {
                 y += cy;
                 D += B;
             }
+            z += dz / dx;
             x++;
             D += A;
         }
@@ -378,12 +453,13 @@ void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
             D = A + 2 * B;
             while (y <= y1)
             {
-                plot(x, y, s, c);
+                plot(x, y, z, s, zb, c);
                 if (D < 0) // next midpoint is above the line
                 {
                     x++;
                     D += A;
                 }
+                z += dz / dy;
                 y++;
                 D += B;
             }
@@ -393,15 +469,36 @@ void draw_line(int x0, int y0, int x1, int y1, Image s, color c)
             D = A - 2 * B;
             while (y >= y1)
             {
-                plot(x, y, s, c);
+                plot(x, y, z, s, zb, c);
                 if (D > 0) // next midpoint is below the line
                 {
                     x++;
                     D += A;
                 }
+                z += dz / dy;
                 y--;
                 D -= B;
             }
         }
     }
 }
+
+#include <limits.h>
+
+void plot(int x, int y, double z, Image s, zbuffer zb, color c)
+{
+    /* NOTE: (0, 0) is the bottom left corner */
+    y = YRES - 1 - y;
+    if (x >= 0 && x < XRES && y >= 0 && y < YRES)
+    {
+        if (zb[x][y] < z)
+        {
+            s[x][y] = c;
+            /* Subtracting a very small number seems to reduce the number of blurry edges
+             * between polygons with very similar z-values, but not sure if this is a good idea */
+            zb[x][y] = z - 0.000000000001;
+            /* zb[x][y] = z; */
+        }
+    }
+}
+

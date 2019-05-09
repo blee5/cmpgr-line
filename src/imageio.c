@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "image.h"
 #include "imageio.h"
@@ -11,6 +12,13 @@ Image *init_image()
     return s;
 }
 
+zbuffer *init_zbuffer()
+{
+    zbuffer *zb = malloc(sizeof (zbuffer));
+    clear_zbuffer(*zb);
+    return zb;
+}
+
 void clear_image(Image s)
 {
     int x, y;
@@ -19,12 +27,16 @@ void clear_image(Image s)
     c.g = DEFAULT_COLOR;
     c.b = DEFAULT_COLOR;
     for (y = 0; y < YRES; y++)
-    {
         for (x = 0; x < XRES; x++)
-        {
             s[x][y] = c;
-        }
-    }
+}
+
+void clear_zbuffer(zbuffer zb)
+{
+    int x, y;
+    for (y = 0; y < YRES; y++)
+        for (x = 0; x < XRES; x++)
+            zb[x][y] = LONG_MIN;
 }
 
 /* Save image as a file */
