@@ -48,5 +48,10 @@
 # Python scripts for personal use
 *.py
 
+# bison/flex generated files
+lex.yy.c
+yacc/mdl.tab.c
+yacc/mdl.tab.h
+
 # Compiled binary
-main
+mdl
