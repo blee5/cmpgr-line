@@ -1,0 +1,35 @@
+// this is a comment and should be ignored :)
+// helpful resource for constants: http://devernay.free.fr/cours/opengl/materials.html
+constants bronze 0.2125 0.714 0.393548 0.1275 0.4284 0.2719 0.054 0.1814 0.166712
+constants black_rubber 0.05 0.5 0.7 .05 .5 .7 0.05 0.5 0.7
+constants gold 0.24725 0.75164 0.628281 0.1995 0.60648 0.555802 0.0745 0.22648 0.336065 35 35 35
+
+move 250 250 0
+save_coord_system center
+push
+
+sphere bronze 100 15 0 60
+sphere bronze -100.0 15 0 60
+
+move 999 999 999
+sphere black_rubber 0 -30 0 100 center
+
+pop
+push
+rotate x 10
+torus 0 130 0 20 130
+
+rotate y -35
+move 0 0 900
+scale 1.50 1 1
+box gold -20 -50 200 100 100 100
+
+pop
+push
+scale 5 1 1
+rotate z -10
+sphere gold 90 -80 -500 300
+
+display
+save bison.png
+

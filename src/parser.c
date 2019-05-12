@@ -103,8 +103,8 @@ void parse_file(char *filename,
                          &x0, &y0, &z0, &x1, &y1, &z1);
             add_box(polygons, x0, y0, z0, x1, y1, z1);
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, zb,
-                          view, light, ambient, a_reflect, d_reflect, s_reflect);
+            /* draw_polygons(polygons, s, zb, */
+                          /* view, light, ambient, a_reflect, d_reflect, s_reflect); */
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "sphere") == 0)
@@ -114,8 +114,8 @@ void parse_file(char *filename,
                          &x0, &y0, &z0, &r);
             add_sphere(polygons, x0, y0, z0, r, NUM_POLY);
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, zb,
-                          view, light, ambient, a_reflect, d_reflect, s_reflect);
+            /* draw_polygons(polygons, s, zb, */
+                          /* view, light, ambient, a_reflect, d_reflect, s_reflect); */
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "torus") == 0)
@@ -125,8 +125,8 @@ void parse_file(char *filename,
                          &x0, &y0, &z0, &r, &R);
             add_torus(polygons, x0, y0, z0, r, R, NUM_POLY);
             matrix_mult(peek(stack), polygons);
-            draw_polygons(polygons, s, zb,
-                          view, light, ambient, a_reflect, d_reflect, s_reflect);
+            /* draw_polygons(polygons, s, zb, */
+                          /* view, light, ambient, a_reflect, d_reflect, s_reflect); */
             polygons->lastcol = 0;
         }
         else if (strcmp(line, "translate") == 0 || strcmp(line, "move") == 0)

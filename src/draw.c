@@ -374,17 +374,18 @@ void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
  */
 void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
                    double *view, double light[2][3], color ambient,
-                   double *a_reflect, double *d_reflect, double *s_reflect)
+                   struct constants constants)
 {
     int col;
     double *normal;
+    /* print_matrix(polygons); */
     for (col = 0; col < polygons->lastcol; col += 3)
     {
         /* Backface culling */
         normal = calculate_normal(polygons, col);
         if (dot_product(view, normal) > 0)
         {
-            color i = get_lighting(normal, view, ambient, light, a_reflect, d_reflect, s_reflect);
+            color i = get_lighting(normal, view, ambient, light, &constants);
             
             /* display(s); */
             scanline_convert(polygons, col / 3, s, zb, i);
@@ -496,7 +497,7 @@ void plot(int x, int y, double z, Image s, zbuffer zb, color c)
             s[x][y] = c;
             /* Subtracting a very small number seems to reduce the number of blurry edges
              * between polygons with very similar z-values, but not sure if this is a good idea */
-            zb[x][y] = z - 0.000000000001;
+            zb[x][y] = z - 0.00001;
             /* zb[x][y] = z; */
         }
     }
