@@ -18,7 +18,7 @@ void my_main()
     double view[3];
 
     /* default values */
-    NUM_POLY = 1000;
+    NUM_POLY = 10;
     SHINYNESS = 30;
     ambient.r = 200;
     ambient.g = 200;
@@ -125,6 +125,22 @@ void my_main()
                 draw_polygons(polygons, *s, *zb,
                               view, light, ambient, *constants);
                 polygons->lastcol = 0;
+                break;
+            }
+
+            /*
+             * 2d objects
+             */
+            case LINE:
+            {
+                double x0, y0, z0, x1, y1, z1;
+                x0 = op[i].op.line.p0[0];
+                y0 = op[i].op.line.p0[1];
+                z0 = op[i].op.line.p0[2];
+                x1 = op[i].op.line.p1[0];
+                y1 = op[i].op.line.p1[1];
+                z1 = op[i].op.line.p1[2];
+                draw_line(x0, y0, z0, x1, y1, z1, *s, *zb, ambient);
                 break;
             }
 

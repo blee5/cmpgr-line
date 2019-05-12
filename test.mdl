@@ -30,6 +30,8 @@ scale 5 1 1
 rotate z -10
 sphere gold 90 -80 -500 300
 
+line 0 0 0 500 500 500
+
 display
 save bison.png
 
