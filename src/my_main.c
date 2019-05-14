@@ -9,7 +9,7 @@
 #include "matrix.h"
 #include "stack.h"
 #include "parser.h"
-#include "../yacc/mdl.tab.h"
+#include "mdl.tab.h"
 
 void my_main()
 {
@@ -18,7 +18,7 @@ void my_main()
     double view[3];
 
     /* default values */
-    NUM_POLY = 10;
+    NUM_POLY = 500;
     SHINYNESS = 30;
     ambient.r = 200;
     ambient.g = 200;

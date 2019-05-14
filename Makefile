@@ -30,7 +30,7 @@ $(TARGET_EXEC): $(PAR_DIR)/mdl.tab.h $(PAR_DIR)/mdl.tab.c $(PAR_DIR)/lex.yy.c $(
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS) -I $(PAR_DIR)
 
 .PHONY: clean
 clean:
