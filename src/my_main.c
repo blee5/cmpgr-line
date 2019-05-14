@@ -13,6 +13,12 @@
 
 void my_main()
 {
+    /* temp_line_colororary color for lines, replace this later */
+    color temp_line_color;
+    temp_line_color.r = 255;
+    temp_line_color.g = 0;
+    temp_line_color.b = 0;
+
     color ambient;
     double light[2][3];
     double view[3];
@@ -136,11 +142,14 @@ void my_main()
                 double x0, y0, z0, x1, y1, z1;
                 x0 = op[i].op.line.p0[0];
                 y0 = op[i].op.line.p0[1];
-                z0 = op[i].op.line.p0[2];
+                z0 = op[i].op.line.p0[0];
                 x1 = op[i].op.line.p1[0];
                 y1 = op[i].op.line.p1[1];
                 z1 = op[i].op.line.p1[2];
-                draw_line(x0, y0, z0, x1, y1, z1, *s, *zb, ambient);
+                add_edge(edges, x0, y0, z0, x1, y1, z1);
+                matrix_mult(cs, edges);
+                draw_edges(edges, *s, *zb, temp_line_color);
+                edges->lastcol = 1;
                 break;
             }
 

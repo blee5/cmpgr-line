@@ -4,6 +4,8 @@ constants bronze 0.2125 0.714 0.393548 0.1275 0.4284 0.2719 0.054 0.1814 0.16671
 constants black_rubber 0.05 0.5 0.7 .05 .5 .7 0.05 0.5 0.7
 constants gold 0.24725 0.75164 0.628281 0.1995 0.60648 0.555802 0.0745 0.22648 0.336065 35 35 35
 
+push
+
 move 250 250 0
 save_coord_system center
 push
@@ -30,7 +32,13 @@ scale 5 1 1
 rotate z -10
 sphere gold 90 -80 -500 300
 
+<<<<<<< HEAD
 line 0 0 0 500 500 500
+=======
+pop
+pop
+line 0 0 50000 500 500 50000
+>>>>>>> 271cc221051920fd48976a6b65002972141256bf
 
 display
 save bison.png

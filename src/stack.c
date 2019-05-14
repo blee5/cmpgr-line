@@ -43,6 +43,11 @@ struct matrix *peek(struct stack *s)
 
 void pop(struct stack *s)
 {
+    if (s->top <= 0)
+    {
+        fprintf(stderr, "popping from empty stack\n");
+        abort();
+    }
     free_matrix(s->data[s->top]);
     s->top--;
 }
