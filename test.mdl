@@ -32,13 +32,9 @@ scale 5 1 1
 rotate z -10
 sphere gold 90 -80 -500 300
 
-<<<<<<< HEAD
-line 0 0 0 500 500 500
-=======
 pop
 pop
 line 0 0 50000 500 500 50000
->>>>>>> 271cc221051920fd48976a6b65002972141256bf
 
 display
 save bison.png
