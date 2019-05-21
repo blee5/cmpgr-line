@@ -11,8 +11,89 @@
 #include "parser.h"
 #include "mdl.tab.h"
 
+void first_pass()
+{
+    extern int num_frames;
+    extern char *name;
+    num_frames = -1;
+    name = NULL;
+
+    int is_anim = 0;
+    
+    for (int i = 0; i < lastop; ++i)
+    {
+        switch (op[i].opcode)
+        {
+            case VARY:
+            {
+                is_anim = 1;
+            }
+            case FRAMES:
+            {
+                num_frames = op[i].op.frames.num_frames;
+                break;
+            }
+            case BASENAME:
+            {
+                name = op[i].op.basename.p->name;
+                break;
+            }
+        }
+    }
+    if (name == NULL)
+    {
+        fprintf(stderr, "Warning: basename not found, using default value of 'foo'\n");
+        name = "foo";
+    }
+
+    if (num_frames < 0 && is_anim)
+    {
+        fprintf(stderr, "Number of frames not set\n");
+        exit(-1);
+    }
+}
+
+/*======== struct vary_node ** second_pass() ==========
+    Returns: An array of vary_node linked lists
+
+    In order to set the knobs for animation, we need to keep
+    a seaprate value for each knob for each frame. We can do
+    this by using an array of linked lists. Each array index
+    will correspond to a frame (eg. knobs[0] would be the first
+    frame, knobs[2] would be the 3rd frame and so on).
+
+    Each index should contain a linked list of vary_nodes, each
+    node contains a knob name, a value, and a pointer to the
+    next node.
+
+    Go through the opcode array, and when you find vary, go
+    from knobs[0] to knobs[frames-1] and add (or modify) the
+    vary_node corresponding to the given knob with the
+    appropirate value.
+    ====================*/
+struct vary_node **second_pass()
+{
+    struct vary_node *curr = NULL;
+    struct vary_node **knobs = calloc(num_frames, sizeof(struct vary_node *));
+
+    for (int i = 0; i < lastop; ++i)
+    {
+        if (op[i].opcode == VARY)
+        {
+        }
+    return knobs;
+}
+
+
 void my_main()
 {
+    struct vary_node **knobs;
+    struct vary_node *vn;
+    first_pass();
+    knobs = second_pass();
+    char frame_name[128];
+    int f;
+
     /* temp_line_colororary color for lines, replace this later */
     color temp_line_color;
     temp_line_color.r = 255;
@@ -54,6 +135,8 @@ void my_main()
     white.g[SPECULAR_R] = 0.4;
     white.b[SPECULAR_R] = 0.4;
 
+    struct constants *reflect = &white;
+
     /* initialize image */
     Image *s = init_image();
     zbuffer *zb = init_zbuffer();
@@ -69,7 +152,7 @@ void my_main()
     struct matrix *transform;
     for (int i = 0; i < lastop; ++i)
     {
-        struct constants *constants = &white;
+        struct constants *constants = reflect;
         struct matrix *cs = peek(stack);
         switch (op[i].opcode)
         {
