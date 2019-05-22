@@ -158,5 +158,6 @@ struct vary_node
 void print_knobs();
 void process_knobs();
 void first_pass();
-struct vary_node ** second_pass();
+struct vary_node **second_pass();
+
 #endif
