@@ -275,7 +275,8 @@ void my_main()
                     y = op[i].op.scale.d[1];
                     z = op[i].op.scale.d[2];
                     transform = make_scale(x, y, z);
-                    matrix_mult(transform, peek(stack));
+                    matrix_mult(cs, transform);
+                    copy_matrix(transform, cs);
                     free_matrix(transform);
                     break;
                 }
@@ -286,8 +287,8 @@ void my_main()
                     y = op[i].op.move.d[1];
                     z = op[i].op.move.d[2];
                     transform = make_translate(x, y, z);
-                    matrix_mult(transform, peek(stack));
-                    free_matrix(transform);
+                    matrix_mult(cs, transform);
+                    copy_matrix(transform, cs);
                     break;
                 }
                 case ROTATE:
@@ -305,7 +306,8 @@ void my_main()
                             transform = make_rotZ(theta);
                             break;
                     }
-                    matrix_mult(transform, peek(stack));
+                    matrix_mult(cs, transform);
+                    copy_matrix(transform, cs);
                     free_matrix(transform);
                     break;
                 }
@@ -346,8 +348,12 @@ void my_main()
                 }
             }
         }
-        save_image(*s, frame_name);
-        printf("%s\n", frame_name);
+
+        if (num_frames > 0) // is animation
+        {
+            save_image(*s, frame_name);
+            printf("%s\n", frame_name);
+        }
 
         free(zb);
         free(s);
