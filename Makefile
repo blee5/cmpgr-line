@@ -15,6 +15,7 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
 	./$(TARGET_EXEC) cart.mdl
+	animate cart.gif
 
 $(PAR_DIR)/lex.yy.c: $(PAR_DIR)/mdl.l $(PAR_DIR)/mdl.tab.h
 	flex -o $@ $(PAR_DIR)/mdl.l
