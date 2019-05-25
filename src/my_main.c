@@ -54,27 +54,8 @@ void first_pass()
     }
 }
 
-/*======== struct vary_node ** second_pass() ==========
-    Returns: An array of vary_node linked lists
-
-    In order to set the knobs for animation, we need to keep
-    a seaprate value for each knob for each frame. We can do
-    this by using an array of linked lists. Each array index
-    will correspond to a frame (eg. knobs[0] would be the first
-    frame, knobs[2] would be the 3rd frame and so on).
-
-    Each index should contain a linked list of vary_nodes, each
-    node contains a knob name, a value, and a pointer to the
-    next node.
-
-    Go through the opcode array, and when you find vary, go
-    from knobs[0] to knobs[frames-1] and add (or modify) the
-    vary_node corresponding to the given knob with the
-    appropirate value.
-    ====================*/
 struct vary_node **second_pass()
 {
-    struct vary_node *curr = NULL;
     struct vary_node **knobs = calloc(num_frames, sizeof(struct vary_node *));
 
     for (int i = 0; i < lastop; ++i)
@@ -88,13 +69,14 @@ struct vary_node **second_pass()
             double dv = (val_e - val_i) / (end - start);
             char *name = op[i].op.vary.p->name;
 
-            double val = val_i;
             for (int frame = start; frame < end; ++frame)
             {
+                if (frame > num_frames)
+                    break;
                 struct vary_node *temp = malloc(sizeof(struct vary_node));
                 strncpy(temp->name, name, 128);
                 temp->value = val_i;
-                val_i += dv;
+                temp->next = NULL;
                 struct vary_node *it = knobs[frame];
                 if (it)
                 {
@@ -103,22 +85,15 @@ struct vary_node **second_pass()
                 }
                 else
                     knobs[frame] = temp;
+                val_i += dv;
             }
         }
     }
     return knobs;
 }
 
-
 void my_main()
 {
-    struct vary_node **knobs;
-    struct vary_node *vn;
-    first_pass();
-    knobs = second_pass();
-    char frame_name[128];
-    int f;
-
     /* temp_line_colororary color for lines, replace this later */
     color temp_line_color;
     temp_line_color.r = 255;
@@ -130,8 +105,8 @@ void my_main()
     double view[3];
 
     /* default values */
-    NUM_POLY = 500;
-    SHINYNESS = 30;
+    NUM_POLY = 300;
+    SHINYNESS = 7;
     ambient.r = 200;
     ambient.g = 200;
     ambient.b = 200;
@@ -161,28 +136,47 @@ void my_main()
     white.g[SPECULAR_R] = 0.4;
     white.b[SPECULAR_R] = 0.4;
 
+    struct vary_node **knobs;
+    /* struct vary_node *vn; */
+    first_pass();
+    knobs = second_pass();
+    char frame_name[128];
+
     int cur_frame = 0;
+
+    /* initialize image */
+    Image *s = init_image();
+    zbuffer *zb = init_zbuffer();
     do
     {
         sprintf(frame_name, "anim/%s_%03d.png", name, cur_frame);
 
-        /* initialize image */
-        Image *s = init_image();
-        zbuffer *zb = init_zbuffer();
+        /* set knob values in symbol table */
+        if (num_frames > 0)
+        {
+            struct vary_node *vn;
+            vn = knobs[cur_frame];
+            while (vn)
+            {
+                SYMTAB *s = lookup_symbol(vn->name);
+                set_value(s, vn->value);
+                vn = vn->next;
+            }
+        }
 
         /* initialize matrices for storing points */
         struct matrix *edges, *polygons;
         edges = new_matrix(4, 0);
         polygons = new_matrix(4, 0);
 
-        /* initialize stack for storing coordinate systems */
-        struct stack *stack = new_stack();
+        /* initialize systems for storing coordinate systems */
+        struct stack *systems = new_stack();
         struct matrix *transform;
 
         for (int i = 0; i < lastop; ++i)
         {
             struct constants *constants = reflect;
-            struct matrix *cs = peek(stack);
+            struct matrix *cs = peek(systems);
             switch (op[i].opcode)
             {
                 /*
@@ -274,6 +268,13 @@ void my_main()
                     x = op[i].op.scale.d[0];
                     y = op[i].op.scale.d[1];
                     z = op[i].op.scale.d[2];
+                    if (op[i].op.scale.p)
+                    {
+                        SYMTAB *s = lookup_symbol(op[i].op.scale.p->name);
+                        x *= s->s.value;
+                        y *= s->s.value;
+                        z *= s->s.value;
+                    }
                     transform = make_scale(x, y, z);
                     matrix_mult(cs, transform);
                     copy_matrix(transform, cs);
@@ -286,14 +287,28 @@ void my_main()
                     x = op[i].op.move.d[0];
                     y = op[i].op.move.d[1];
                     z = op[i].op.move.d[2];
+                    if (op[i].op.move.p)
+                    {
+                        SYMTAB *s = lookup_symbol(op[i].op.move.p->name);
+                        x *= s->s.value;
+                        y *= s->s.value;
+                        z *= s->s.value;
+                    }
                     transform = make_translate(x, y, z);
                     matrix_mult(cs, transform);
                     copy_matrix(transform, cs);
+                    free_matrix(transform);
                     break;
                 }
                 case ROTATE:
                 {
                     double theta = op[i].op.rotate.degrees;
+                    if (op[i].op.rotate.p)
+                    {
+                        SYMTAB *s = lookup_symbol(op[i].op.rotate.p->name);
+                        theta *= s->s.value;
+                    }
+
                     switch ((int)op[i].op.rotate.axis)
                     {
                         case 0:
@@ -306,6 +321,7 @@ void my_main()
                             transform = make_rotZ(theta);
                             break;
                     }
+
                     matrix_mult(cs, transform);
                     copy_matrix(transform, cs);
                     free_matrix(transform);
@@ -313,23 +329,23 @@ void my_main()
                 }
 
                 /*
-                 * stack operations
+                 * systems operations
                  */
                 case PUSH:
                 {
                     transform = new_matrix(4, 4);
-                    copy_matrix(peek(stack), transform);
-                    push(stack, transform);
+                    copy_matrix(peek(systems), transform);
+                    push(systems, transform);
                     break;
                 }
                 case POP:
                 {
-                    pop(stack);
+                    pop(systems);
                     break;
                 }
                 case SAVE_COORDS:
                 {
-                    copy_matrix(peek(stack), op[i].op.save_coordinate_system.p->s.m);
+                    copy_matrix(peek(systems), op[i].op.save_coordinate_system.p->s.m);
                     break;
                 }
 
@@ -355,10 +371,17 @@ void my_main()
             printf("%s\n", frame_name);
         }
 
-        free(zb);
-        free(s);
+        clear_zbuffer(*zb);
+        clear_image(*s);
+        free_stack(systems);
         free_matrix(edges);
         free_matrix(polygons);
     }
-    while (cur_frame++ < num_frames);
+    while (++cur_frame < num_frames);
+
+    if (num_frames > 0)
+        make_animation(name);
+
+    free(s);
+    free(zb);
 }

@@ -1,6 +1,11 @@
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <sys/wait.h>
 
 #include "image.h"
 #include "imageio.h"
@@ -74,3 +79,26 @@ void write_image(Image s, FILE *f)
     }
     pclose(f);
 }
+
+void make_animation(char *name)
+{
+    int e, f;
+    char name_arg[128];
+    char gif_name[128];
+
+    sprintf(name_arg, "anim/%s*", name);
+    sprintf(gif_name, "%s.gif", name);
+    printf("Making animation: %s\n", gif_name);
+    f = fork();
+    if (f == 0)
+    {
+        e = execlp("convert", "convert", "-delay", "1.7", name_arg, gif_name, NULL);
+        printf("e: %d errno: %d: %s\n", e, errno, strerror(errno));
+    }
+    else
+    {
+        wait(NULL);
+        printf("Animation created.\n");
+    }
+}
+
