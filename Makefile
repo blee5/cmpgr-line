@@ -14,8 +14,7 @@ PARS := $(shell find $(PAR_DIR) -name "*.c")
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
-	./$(TARGET_EXEC) cart.mdl
-	animate cart.gif
+	./$(TARGET_EXEC) save_coord.mdl
 
 $(PAR_DIR)/lex.yy.c: $(PAR_DIR)/mdl.l $(PAR_DIR)/mdl.tab.h
 	flex -o $@ $(PAR_DIR)/mdl.l

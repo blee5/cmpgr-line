@@ -222,6 +222,7 @@ void my_main()
                 }
                 case TORUS:
                 {
+                    printf("%p\n", op[i].op.torus.cs);
                     double x0, y0, z0, r0, r1;
                     x0 = op[i].op.torus.d[0];
                     y0 = op[i].op.torus.d[1];
