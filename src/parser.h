@@ -143,6 +143,20 @@ struct command
 
 extern struct command op[MAX_COMMANDS];
 
-void print_pcode();
 void my_main();
+
+int num_frames;
+char *name;
+
+struct vary_node
+{
+    char name[128];
+    double value;
+    struct vary_node *next;
+};
+
+void print_knobs();
+void first_pass();
+struct vary_node **second_pass();
+
 #endif

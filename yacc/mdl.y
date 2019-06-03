@@ -133,7 +133,7 @@ TORUS DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING
     op[lastop].op.torus.r1 = $6;
     op[lastop].op.torus.constants = NULL;
     m = new_matrix(4,4);
-    op[lastop].op.sphere.cs = add_symbol($7, SYM_MATRIX, m);
+    op[lastop].op.torus.cs = add_symbol($7, SYM_MATRIX, m);
     lastop++;
 }|
 TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE
@@ -147,7 +147,7 @@ TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE
     op[lastop].op.torus.r0 = $6;
     op[lastop].op.torus.r1 = $7;
     c = malloc(sizeof(struct constants));
-    op[lastop].op.sphere.constants = add_symbol($2, SYM_CONSTANTS, c);
+    op[lastop].op.torus.constants = add_symbol($2, SYM_CONSTANTS, c);
     op[lastop].op.torus.cs = NULL;
     lastop++;
 }|
@@ -162,9 +162,9 @@ TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING
     op[lastop].op.torus.r0 = $6;
     op[lastop].op.torus.r1 = $7;
     c = malloc(sizeof(struct constants));
-    op[lastop].op.sphere.constants = add_symbol($2, SYM_CONSTANTS, c);
+    op[lastop].op.torus.constants = add_symbol($2, SYM_CONSTANTS, c);
     m = new_matrix(4,4);
-    op[lastop].op.sphere.cs = add_symbol($8, SYM_MATRIX, m);
+    op[lastop].op.torus.cs = add_symbol($8, SYM_MATRIX, m);
     lastop++;
 }|
 
@@ -785,7 +785,6 @@ int main(int argc, char **argv)
     }
 
     yyparse();
-    /* print_pcode(); */
     my_main();
     return 0;
 }

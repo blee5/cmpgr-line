@@ -6,7 +6,7 @@ BUILD_DIR ?= build
 SRC_DIR ?= src
 PAR_DIR ?= yacc
 
-CFLAGS := -Wall -Wextra -O3 -Wno-unused-result
+CFLAGS := -Wall -Wextra -O3 -Wno-unused-result -Wno-unused-variable -g
 LFLAGS := -lm
 
 SRCS := $(shell find $(SRC_DIR) -name "*.c")
@@ -14,7 +14,7 @@ PARS := $(shell find $(PAR_DIR) -name "*.c")
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
-	./$(TARGET_EXEC) test.mdl
+	./$(TARGET_EXEC) save_coord.mdl
 
 $(PAR_DIR)/lex.yy.c: $(PAR_DIR)/mdl.l $(PAR_DIR)/mdl.tab.h
 	flex -o $@ $(PAR_DIR)/mdl.l
@@ -30,7 +30,7 @@ $(TARGET_EXEC): $(PAR_DIR)/mdl.tab.h $(PAR_DIR)/mdl.tab.c $(PAR_DIR)/lex.yy.c $(
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS) -I $(PAR_DIR)
 
 .PHONY: clean
 clean:
