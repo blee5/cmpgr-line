@@ -164,7 +164,7 @@ TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING
     c = malloc(sizeof(struct constants));
     op[lastop].op.torus.constants = add_symbol($2, SYM_CONSTANTS, c);
     m = new_matrix(4,4);
-    op[lastop].op.sphere.cs = add_symbol($8, SYM_MATRIX, m);
+    op[lastop].op.torus.cs = add_symbol($8, SYM_MATRIX, m);
     lastop++;
 }|
 
