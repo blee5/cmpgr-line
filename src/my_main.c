@@ -94,18 +94,14 @@ struct vary_node **second_pass()
 
 void my_main()
 {
-    /* temp_line_colororary color for lines, replace this later */
-    color temp_line_color;
-    temp_line_color.r = 255;
-    temp_line_color.g = 0;
-    temp_line_color.b = 0;
-
     color ambient;
     struct light *lights[MAX_LIGHTS] = {0};
     int num_lights = 0;
     double view[3];
 
     /* default values */
+    SHADING_MODE = FLAT;
+
     NUM_POLY = 250;
     SHINYNESS = 1.6;
     ambient.r = 200;
@@ -189,8 +185,10 @@ void my_main()
                         cs = op[i].op.sphere.cs->s.m;
                     add_sphere(polygons, x, y, z, r, NUM_POLY);
                     matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
+                    
+                    if (SHADING_MODE == FLAT)
+                        draw_polygons(polygons, *s, *zb,
+                                      view, lights, ambient, *constants);
                     polygons->lastcol = 0;
                     break;
                 }
@@ -209,8 +207,10 @@ void my_main()
                         cs = op[i].op.box.cs->s.m;
                     add_box(polygons, x, y, z, h, w, d);
                     matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
+
+                    if (SHADING_MODE == FLAT)
+                        draw_polygons(polygons, *s, *zb,
+                                      view, lights, ambient, *constants);
                     polygons->lastcol = 0;
                     break;
                 }
@@ -228,28 +228,11 @@ void my_main()
                         cs = op[i].op.torus.cs->s.m;
                     add_torus(polygons, x0, y0, z0, r0, r1, NUM_POLY);
                     matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
-                    break;
-                }
 
-                /*
-                 * 2d objects
-                 */
-                case LINE:
-                {
-                    double x0, y0, z0, x1, y1, z1;
-                    x0 = op[i].op.line.p0[0];
-                    y0 = op[i].op.line.p0[1];
-                    z0 = op[i].op.line.p0[0];
-                    x1 = op[i].op.line.p1[0];
-                    y1 = op[i].op.line.p1[1];
-                    z1 = op[i].op.line.p1[2];
-                    add_edge(edges, x0, y0, z0, x1, y1, z1);
-                    matrix_mult(cs, edges);
-                    draw_edges(edges, *s, *zb, temp_line_color);
-                    edges->lastcol = 1;
+                    if (SHADING_MODE == FLAT)
+                        draw_polygons(polygons, *s, *zb,
+                                      view, lights, ambient, *constants);
+                    polygons->lastcol = 0;
                     break;
                 }
 
@@ -370,6 +353,19 @@ void my_main()
                 /*
                  * misc
                  */
+                case SHADING:
+                {
+                    char *s = op[i].op.shading.p->name;
+                    if (strcmp("flat", s) == 0)
+                    {
+                        SHADING_MODE = FLAT;
+                    }
+                    else if (strcmp("raytrace", s) == 0)
+                    {
+                        SHADING_MODE = RAYTRACE;
+                    }
+                    break;
+                }
                 case SAVE:
                 {
                     save_image(*s, op[i].op.save.p->name);

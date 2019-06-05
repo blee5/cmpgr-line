@@ -14,6 +14,7 @@ PARS := $(shell find $(PAR_DIR) -name "*.c")
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
+	./$(TARGET_EXEC) raytrace.mdl
 	./$(TARGET_EXEC) lights.mdl
 	./$(TARGET_EXEC) save_coord.mdl
 

@@ -378,7 +378,6 @@ void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
 {
     int col;
     double *normal;
-    /* print_matrix(polygons); */
     for (col = 0; col < polygons->lastcol; col += 3)
     {
         /* Backface culling */

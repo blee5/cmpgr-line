@@ -1,0 +1,8 @@
+shading raytrace
+shading flat
+
+light -1 1 2 250 150 30
+sphere 150 250 0 100
+sphere 350 250 30 60
+display
+
