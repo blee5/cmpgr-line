@@ -101,23 +101,16 @@ void my_main()
     temp_line_color.b = 0;
 
     color ambient;
-    struct lights *lights = malloc(sizeof(struct lights));
+    struct light *lights[MAX_LIGHTS] = {0};
+    int num_lights = 0;
     double view[3];
 
     /* default values */
-    NUM_POLY = 300;
-    SHINYNESS = 7;
+    NUM_POLY = 250;
+    SHINYNESS = 1.6;
     ambient.r = 200;
     ambient.g = 200;
     ambient.b = 200;
-
-    lights->light.l[0] = 1;
-    lights->light.l[1] = 1;
-    lights->light.l[2] = 1;
-    lights->light.c[RED] = 200;
-    lights->light.c[GREEN] = 200;
-    lights->light.c[BLUE] = 200;
-    lights->next = NULL;
 
     view[0] = 0;
     view[1] = 0;
@@ -363,9 +356,14 @@ void my_main()
 
                 case LIGHT:
                 {
-                    lights->light.c[0] = op[i].op.light.c[0];
-                    lights->light.c[1] = op[i].op.light.c[1];
-                    lights->light.c[2] = op[i].op.light.c[2];
+                    struct light *l = malloc(sizeof(struct light));
+                    l->l[0] = op[i].op.light.l[0];
+                    l->l[1] = op[i].op.light.l[1];
+                    l->l[2] = op[i].op.light.l[2];
+                    l->c[0] = op[i].op.light.c[0];
+                    l->c[1] = op[i].op.light.c[1];
+                    l->c[2] = op[i].op.light.c[2];
+                    lights[num_lights++] = l;
                     break;
                 }
 

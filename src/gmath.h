@@ -15,14 +15,7 @@
 
 #define SPECULAR_EXP 4
 
-struct lights
-{
-    struct light light;
-    struct lights *next;
-};
-
-
-color get_lighting(double *normal, double *view, color a_light, struct lights *lights, struct constants *refect);
+color get_lighting(double *normal, double *view, color a_light, struct light *lights[], struct constants *refect);
 color calculate_ambient(color a_light, struct constants *reflect);
 color calculate_diffuse(struct light, struct constants *reflect, double *normal);
 color calculate_specular(struct light, struct constants *reflect, double *view, double *normal);

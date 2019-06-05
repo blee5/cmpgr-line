@@ -373,7 +373,7 @@ void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
  * Draw the polygons from the polygon matrix
  */
 void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
-                   double *view, struct lights *lights, color ambient,
+                   double *view, struct light *lights[], color ambient,
                    struct constants constants)
 {
     int col;

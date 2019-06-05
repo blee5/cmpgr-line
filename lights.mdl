@@ -1,0 +1,21 @@
+light 0 1 0 250 0 0
+light -25 -5 0 0 250 0
+light 0 0 10 0 0 150
+
+light 1 1 1 35 255 35
+
+// dark
+ambient 0 0 0
+sphere 400 350 0 75
+sphere 100 150 0 75
+
+// bright
+ambient 255 255 255
+
+move 250 250 0
+rotate x 30
+rotate y 75
+rotate z 35
+torus 0 0 0 50 100
+
+display

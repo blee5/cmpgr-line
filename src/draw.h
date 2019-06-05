@@ -33,7 +33,7 @@ void add_polygon(struct matrix *polygons,
                  double x2, double y2, double z2);
 void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c);
 void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
-                   double *view, struct lights *lights, color ambient,
+                   double *view, struct light *lights[], color ambient,
                    struct constants constants);
 
 void plot(int x, int y, double z, Image s, zbuffer zb, color c);

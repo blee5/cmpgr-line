@@ -6,6 +6,7 @@
 #include "symtab.h"
 
 #define MAX_COMMANDS 512
+#define MAX_LIGHTS 256
 
 extern int lastop;
 
@@ -21,7 +22,8 @@ struct command
         struct
         {
             SYMTAB *p;
-            double c[4];
+            double l[3];
+            double c[3];
         } light;
         struct
         {

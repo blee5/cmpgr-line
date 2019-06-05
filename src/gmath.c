@@ -4,26 +4,36 @@
 #include "gmath.h"
 #include "image.h"
 
-color get_lighting(double *normal, double *view, color a_light, struct lights *lights, struct constants *reflect)
+color get_lighting(double *normal, double *view, color a_light, struct light *lights[], struct constants *reflect)
 {
     color il;
-    while (lights)
+    il.r = il.g = il.b = 0;
+
+    int r, g, b;
+    r = g = b = 0;
+
+    color a = calculate_ambient(a_light, reflect);
+    r = a.r;
+    g = a.g;
+    b = a.b;
+
+    struct light *light;
+    for (int i = 0; i < MAX_LIGHTS; ++i)
     {
-        struct light light = lights->light;
+        light = lights[i];
+        if (!light)
+            break;
 
-        color a = calculate_ambient(a_light, reflect);
-        color d = calculate_diffuse(light, reflect, normal);
-        color s = calculate_specular(light, reflect, view, normal);
+        color d = calculate_diffuse(*light, reflect, normal);
+        color s = calculate_specular(*light, reflect, view, normal);
 
-        int r = a.r + d.r + s.r + reflect->red;
-        int g = a.g + d.g + s.g + reflect->green;
-        int b = a.b + d.b + s.b + reflect->blue;
-        il.r = r < MAX_COLOR? r: MAX_COLOR;
-        il.g = g < MAX_COLOR? g: MAX_COLOR;
-        il.b = b < MAX_COLOR? b: MAX_COLOR;
-
-        lights = lights->next;
+        r += d.r + s.r + reflect->red;
+        g += d.g + s.g + reflect->green;
+        b += d.b + s.b + reflect->blue;
     }
+    il.r = r < MAX_COLOR? r: MAX_COLOR;
+    il.g = g < MAX_COLOR? g: MAX_COLOR;
+    il.b = b < MAX_COLOR? b: MAX_COLOR;
     return il;
 }
 

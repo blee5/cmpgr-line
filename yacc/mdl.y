@@ -541,19 +541,15 @@ SAVE STRING
 LIGHT DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE
 {
     lineno++;
-    l = malloc(sizeof(struct light));
-    l->l[0] = $2;
-    l->l[1] = $3;
-    l->l[2] = $4;
-    l->c[0] = $5;
-    l->c[1] = $6;
-    l->c[2] = $7;
     op[lastop].opcode=LIGHT;
+
+    op[lastop].op.light.l[0] = $2;
+    op[lastop].op.light.l[1] = $3;
+    op[lastop].op.light.l[2] = $4;
+
     op[lastop].op.light.c[0] = $5;
     op[lastop].op.light.c[1] = $6;
     op[lastop].op.light.c[2] = $7;
-    op[lastop].op.light.c[3] = 0;
-    /* op[lastop].op.light.p = add_symbol($2, SYM_LIGHT, l); */
     lastop++;
 }|
 
