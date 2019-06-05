@@ -2,8 +2,9 @@
 #define DRAW_H
 
 #include "image.h"
-#include "matrix.h"
+#include "gmath.h"
 #include "symtab.h"
+#include "matrix.h"
 
 void scanline_convert(struct matrix *polygons, int i, Image s, zbuffer zb, color il);
 
@@ -32,10 +33,11 @@ void add_polygon(struct matrix *polygons,
                  double x2, double y2, double z2);
 void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c);
 void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
-                   double *view, double light[2][3], color ambient,
+                   double *view, struct lights *lights, color ambient,
                    struct constants constants);
 
 void plot(int x, int y, double z, Image s, zbuffer zb, color c);
 void draw_line(int x0, int y0, double z0,
                int x1, int y1, double z1, Image s, zbuffer zb, color c);
+
 #endif

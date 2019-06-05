@@ -101,7 +101,7 @@ void my_main()
     temp_line_color.b = 0;
 
     color ambient;
-    double light[2][3];
+    struct lights *lights = malloc(sizeof(struct lights));
     double view[3];
 
     /* default values */
@@ -111,12 +111,13 @@ void my_main()
     ambient.g = 200;
     ambient.b = 200;
 
-    light[LOCATION][0] = 1;
-    light[LOCATION][1] = 1;
-    light[LOCATION][2] = 1;
-    light[COLOR][RED] = 200;
-    light[COLOR][GREEN] = 200;
-    light[COLOR][BLUE] = 200;
+    lights->light.l[0] = 1;
+    lights->light.l[1] = 1;
+    lights->light.l[2] = 1;
+    lights->light.c[RED] = 200;
+    lights->light.c[GREEN] = 200;
+    lights->light.c[BLUE] = 200;
+    lights->next = NULL;
 
     view[0] = 0;
     view[1] = 0;
@@ -196,7 +197,7 @@ void my_main()
                     add_sphere(polygons, x, y, z, r, NUM_POLY);
                     matrix_mult(cs, polygons);
                     draw_polygons(polygons, *s, *zb,
-                                  view, light, ambient, *constants);
+                                  view, lights, ambient, *constants);
                     polygons->lastcol = 0;
                     break;
                 }
@@ -216,7 +217,7 @@ void my_main()
                     add_box(polygons, x, y, z, h, w, d);
                     matrix_mult(cs, polygons);
                     draw_polygons(polygons, *s, *zb,
-                                  view, light, ambient, *constants);
+                                  view, lights, ambient, *constants);
                     polygons->lastcol = 0;
                     break;
                 }
@@ -235,7 +236,7 @@ void my_main()
                     add_torus(polygons, x0, y0, z0, r0, r1, NUM_POLY);
                     matrix_mult(cs, polygons);
                     draw_polygons(polygons, *s, *zb,
-                                  view, light, ambient, *constants);
+                                  view, lights, ambient, *constants);
                     polygons->lastcol = 0;
                     break;
                 }
@@ -346,6 +347,25 @@ void my_main()
                 case SAVE_COORDS:
                 {
                     copy_matrix(peek(systems), op[i].op.save_coordinate_system.p->s.m);
+                    break;
+                }
+
+                /*
+                 * lighting
+                 */
+                case AMBIENT:
+                {
+                    ambient.r = op[i].op.ambient.c[0];
+                    ambient.g = op[i].op.ambient.c[1];
+                    ambient.b = op[i].op.ambient.c[2];
+                    break;
+                }
+
+                case LIGHT:
+                {
+                    lights->light.c[0] = op[i].op.light.c[0];
+                    lights->light.c[1] = op[i].op.light.c[1];
+                    lights->light.c[2] = op[i].op.light.c[2];
                     break;
                 }
 

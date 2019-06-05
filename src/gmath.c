@@ -4,19 +4,26 @@
 #include "gmath.h"
 #include "image.h"
 
-color get_lighting(double *normal, double *view, color a_light, double light[2][3], struct constants *reflect)
+color get_lighting(double *normal, double *view, color a_light, struct lights *lights, struct constants *reflect)
 {
-    color a = calculate_ambient(a_light, reflect);
-    color d = calculate_diffuse(light, reflect, normal);
-    color s = calculate_specular(light, reflect, view, normal);
-
     color il;
-    int r = a.r + d.r + s.r + reflect->red;
-    int g = a.g + d.g + s.g + reflect->green;
-    int b = a.b + d.b + s.b + reflect->blue;
-    il.r = r < MAX_COLOR? r: MAX_COLOR;
-    il.g = g < MAX_COLOR? g: MAX_COLOR;
-    il.b = b < MAX_COLOR? b: MAX_COLOR;
+    while (lights)
+    {
+        struct light light = lights->light;
+
+        color a = calculate_ambient(a_light, reflect);
+        color d = calculate_diffuse(light, reflect, normal);
+        color s = calculate_specular(light, reflect, view, normal);
+
+        int r = a.r + d.r + s.r + reflect->red;
+        int g = a.g + d.g + s.g + reflect->green;
+        int b = a.b + d.b + s.b + reflect->blue;
+        il.r = r < MAX_COLOR? r: MAX_COLOR;
+        il.g = g < MAX_COLOR? g: MAX_COLOR;
+        il.b = b < MAX_COLOR? b: MAX_COLOR;
+
+        lights = lights->next;
+    }
     return il;
 }
 
@@ -28,26 +35,26 @@ color calculate_ambient(color a_light, struct constants *reflect)
     return a_light;
 }
 
-color calculate_diffuse(double light[2][3], struct constants *reflect, double *normal)
+color calculate_diffuse(struct light light, struct constants *reflect, double *normal)
 {
     color c;
     double r, g, b;
     c.r = c.g = c.b = 0;
     normalize(normal);
-    normalize(light[LOCATION]);
-    double diffuse = dot_product(normal, light[LOCATION]);
+    normalize(light.l);
+    double diffuse = dot_product(normal, light.l);
     if (diffuse < 0)
         return c;
-    r = diffuse * reflect->r[DIFFUSE_R] * light[COLOR][RED];
-    g = diffuse * reflect->g[DIFFUSE_R] * light[COLOR][GREEN];
-    b = diffuse * reflect->b[DIFFUSE_R] * light[COLOR][BLUE];
+    r = diffuse * reflect->r[DIFFUSE_R] * light.c[RED];
+    g = diffuse * reflect->g[DIFFUSE_R] * light.c[GREEN];
+    b = diffuse * reflect->b[DIFFUSE_R] * light.c[BLUE];
     c.r = r < MAX_COLOR? r: MAX_COLOR;
     c.g = g < MAX_COLOR? g: MAX_COLOR;
     c.b = b < MAX_COLOR? b: MAX_COLOR;
     return c;
 }
 
-color calculate_specular(double light[2][3], struct constants *reflect, double *view, double *normal)
+color calculate_specular(struct light light, struct constants *reflect, double *view, double *normal)
 {
     color c;
     c.r = c.g = c.b = 0;
@@ -56,17 +63,17 @@ color calculate_specular(double light[2][3], struct constants *reflect, double *
     double diffuse, specular, view_cosine;
     normalize(normal);
     normalize(view);
-    normalize(light[LOCATION]);
-    diffuse = dot_product(normal, light[LOCATION]);
+    normalize(light.l);
+    diffuse = dot_product(normal, light.l);
     for (int i = 0; i < 3; i++)
-        reflection[i] = 2 * diffuse * normal[i] - light[LOCATION][i];
+        reflection[i] = 2 * diffuse * normal[i] - light.l[i];
     view_cosine = dot_product(reflection, view);
     if (view_cosine < 0)
         return c;
     specular = pow(view_cosine, SHINYNESS);
-    r = specular * reflect->r[SPECULAR_R] * light[COLOR][RED];
-    g = specular * reflect->g[SPECULAR_R] * light[COLOR][GREEN];
-    b = specular * reflect->b[SPECULAR_R] * light[COLOR][BLUE]; 
+    r = specular * reflect->r[SPECULAR_R] * light.c[RED];
+    g = specular * reflect->g[SPECULAR_R] * light.c[GREEN];
+    b = specular * reflect->b[SPECULAR_R] * light.c[BLUE];
     c.r = r < MAX_COLOR? r: MAX_COLOR;
     c.g = g < MAX_COLOR? g: MAX_COLOR;
     c.b = b < MAX_COLOR? b: MAX_COLOR;

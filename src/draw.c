@@ -373,7 +373,7 @@ void draw_edges(struct matrix *edges, Image s, zbuffer zb, color c)
  * Draw the polygons from the polygon matrix
  */
 void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
-                   double *view, double light[2][3], color ambient,
+                   double *view, struct lights *lights, color ambient,
                    struct constants constants)
 {
     int col;
@@ -385,7 +385,7 @@ void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
         normal = calculate_normal(polygons, col);
         if (dot_product(view, normal) > 0)
         {
-            color i = get_lighting(normal, view, ambient, light, &constants);
+            color i = get_lighting(normal, view, ambient, lights, &constants);
             
             /* display(s); */
             scanline_convert(polygons, col / 3, s, zb, i);

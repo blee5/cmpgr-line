@@ -1,9 +1,10 @@
 #ifndef GMATH_H
 #define GMATH_H
 
-#include "matrix.h"
 #include "image.h"
+#include "matrix.h"
 #include "parser.h"
+#include "symtab.h"
 
 // lighting constants
 #define LOCATION 0
@@ -14,10 +15,17 @@
 
 #define SPECULAR_EXP 4
 
-color get_lighting(double *normal, double *view, color a_light, double light[2][3], struct constants *refect);
+struct lights
+{
+    struct light light;
+    struct lights *next;
+};
+
+
+color get_lighting(double *normal, double *view, color a_light, struct lights *lights, struct constants *refect);
 color calculate_ambient(color a_light, struct constants *reflect);
-color calculate_diffuse(double light[2][3], struct constants *reflect, double *normal);
-color calculate_specular(double light[2][3], struct constants *reflect, double *view, double *normal);
+color calculate_diffuse(struct light, struct constants *reflect, double *normal);
+color calculate_specular(struct light, struct constants *reflect, double *view, double *normal);
 
 void normalize(double *vector);
 double dot_product(double *a, double *b);
