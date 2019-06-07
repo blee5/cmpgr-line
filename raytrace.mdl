@@ -1,8 +1,10 @@
 shading raytrace
-shading flat
-
 light -1 1 2 250 150 30
-sphere 150 250 0 100
-sphere 350 250 30 60
+
+rotate x 35
+rotate y 30
+box 150 150 0 100 100 100
+box 350 350 0 100 100 100
+//sphere 250 250 0 50 
 display
 

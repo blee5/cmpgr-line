@@ -8,6 +8,7 @@
 #include "imageio.h"
 #include "matrix.h"
 #include "stack.h"
+#include "tracer.h"
 #include "parser.h"
 #include "mdl.tab.h"
 
@@ -137,6 +138,12 @@ void my_main()
     /* initialize image */
     Image *s = init_image();
     zbuffer *zb = init_zbuffer();
+
+    /* initialize matrices for storing points */
+    struct matrix *edges, *temp_poly, *polygons;
+    edges = new_matrix(4, 0);
+    temp_poly = new_matrix(4, 0);
+    polygons = new_matrix(4, 0);
     do
     {
         sprintf(frame_name, "anim/%s_%03d.png", name, cur_frame);
@@ -153,11 +160,6 @@ void my_main()
                 vn = vn->next;
             }
         }
-
-        /* initialize matrices for storing points */
-        struct matrix *edges, *polygons;
-        edges = new_matrix(4, 0);
-        polygons = new_matrix(4, 0);
 
         /* initialize systems for storing coordinate systems */
         struct stack *systems = new_stack();
@@ -183,13 +185,15 @@ void my_main()
                         constants = op[i].op.sphere.constants->s.c;
                     if (op[i].op.sphere.cs)
                         cs = op[i].op.sphere.cs->s.m;
-                    add_sphere(polygons, x, y, z, r, NUM_POLY);
-                    matrix_mult(cs, polygons);
+                    add_sphere(temp_poly, x, y, z, r, NUM_POLY);
+                    matrix_mult(cs, temp_poly);
                     
                     if (SHADING_MODE == FLAT)
-                        draw_polygons(polygons, *s, *zb,
+                        draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
+                    else if (SHADING_MODE == RAYTRACE)
+                        concat_matrix(polygons, temp_poly);
+                    temp_poly->lastcol = 0;
                     break;
                 }
                 case BOX:
@@ -205,13 +209,17 @@ void my_main()
                         constants = op[i].op.box.constants->s.c;
                     if (op[i].op.box.cs)
                         cs = op[i].op.box.cs->s.m;
-                    add_box(polygons, x, y, z, h, w, d);
-                    matrix_mult(cs, polygons);
+                    add_box(temp_poly, x, y, z, h, w, d);
+                    matrix_mult(cs, temp_poly);
 
                     if (SHADING_MODE == FLAT)
-                        draw_polygons(polygons, *s, *zb,
+                        draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
+                    else if (SHADING_MODE == RAYTRACE)
+                    {
+                        concat_matrix(polygons, temp_poly);
+                    }
+                    temp_poly->lastcol = 0;
                     break;
                 }
                 case TORUS:
@@ -226,13 +234,13 @@ void my_main()
                         constants = op[i].op.torus.constants->s.c;
                     if (op[i].op.torus.cs)
                         cs = op[i].op.torus.cs->s.m;
-                    add_torus(polygons, x0, y0, z0, r0, r1, NUM_POLY);
-                    matrix_mult(cs, polygons);
+                    add_torus(temp_poly, x0, y0, z0, r0, r1, NUM_POLY);
+                    matrix_mult(cs, temp_poly);
 
                     if (SHADING_MODE == FLAT)
-                        draw_polygons(polygons, *s, *zb,
+                        draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
+                    temp_poly->lastcol = 0;
                     break;
                 }
 
@@ -373,6 +381,10 @@ void my_main()
                 }
                 case DISPLAY:
                 {
+                    if (SHADING_MODE == RAYTRACE)
+                    {
+                        ray_trace(s, polygons);
+                    }
                     display(*s);
                     break;
                 }
@@ -388,14 +400,15 @@ void my_main()
         clear_zbuffer(*zb);
         clear_image(*s);
         free_stack(systems);
-        free_matrix(edges);
-        free_matrix(polygons);
     }
     while (++cur_frame < num_frames);
 
     if (num_frames > 0)
         make_animation(name);
 
+    free_matrix(edges);
+    free_matrix(temp_poly);
+    free_matrix(polygons);
     free(s);
     free(zb);
 }

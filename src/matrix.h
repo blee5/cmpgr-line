@@ -21,6 +21,7 @@ struct matrix *make_rotZ(double theta);
 
 /* Basic matrix manipulation  */
 struct matrix *new_matrix(int rows, int cols);
+void concat_matrix(struct matrix *dest, struct matrix *src);
 void free_matrix(struct matrix *m);
 void grow_matrix(struct matrix *m, int newcols);
 void copy_matrix(struct matrix *src, struct matrix *dest);

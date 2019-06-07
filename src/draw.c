@@ -483,8 +483,6 @@ void draw_line(int x0, int y0, double z0,
     }
 }
 
-#include <limits.h>
-
 void plot(int x, int y, double z, Image s, zbuffer zb, color c)
 {
     /* NOTE: (0, 0) is the bottom left corner */
