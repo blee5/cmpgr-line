@@ -6,7 +6,7 @@ BUILD_DIR ?= build
 SRC_DIR ?= src
 PAR_DIR ?= yacc
 
-CFLAGS := -Wall -Wextra -O3 -Wno-unused-result -Wno-unused-variable -g
+CFLAGS := -Wall -Wextra -O3 -Wno-unused-result -Wno-unused-variable -g -ffast-math
 LFLAGS := -lm
 
 SRCS := $(shell find $(SRC_DIR) -name "*.c")

@@ -92,19 +92,6 @@ void print_matrix(struct matrix *m)
 }
 
 /*
- * Concatenate the columns of src to the end of dest 
- */
-void concat_matrix(struct matrix *dest, struct matrix *src)
-{
-    int dif = src->lastcol - (dest->cols - dest->lastcol);
-    if (dif > 0)
-        grow_matrix(dest, dif);
-    double *p = &mt_idx(dest, 0, dest->lastcol);
-    memcpy(p, &mt_idx(src, 0, 0), src->rows * src->lastcol * sizeof(double));
-    dest->lastcol += src->lastcol;
-}
-
-/*
  * Matrix multiplication.
  *
  * Given matrices A and B, sets B to AB.
@@ -191,12 +178,12 @@ void grow_matrix(struct matrix *m, int newcols)
 }
 
 /*
- * Returns a copy of a matrix.
+ * Copy src to dest.
+ *
+ * dest should have the same number of rows and columns as src.
  */
 void copy_matrix(struct matrix *src, struct matrix *dest)
 {
-    dest->rows = src->rows;
-    dest->cols = src->cols;
     dest->lastcol = src->lastcol;
     memcpy(dest->mat, src->mat, src->rows * src->cols * sizeof (double));
 }

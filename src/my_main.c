@@ -103,7 +103,7 @@ void my_main()
     /* default values */
     SHADING_MODE = FLAT;
 
-    NUM_POLY = 250;
+    NUM_POLY = 10;
     SHINYNESS = 1.6;
     ambient.r = 200;
     ambient.g = 200;
@@ -127,6 +127,10 @@ void my_main()
     white.g[SPECULAR_R] = 0.4;
     white.b[SPECULAR_R] = 0.4;
 
+    white.red = 0;
+    white.green = 0;
+    white.blue = 0;
+
     struct vary_node **knobs;
     /* struct vary_node *vn; */
     first_pass();
@@ -140,10 +144,10 @@ void my_main()
     zbuffer *zb = init_zbuffer();
 
     /* initialize matrices for storing points */
-    struct matrix *edges, *temp_poly, *polygons;
+    struct matrix *edges, *temp_poly;
     edges = new_matrix(4, 0);
     temp_poly = new_matrix(4, 0);
-    polygons = new_matrix(4, 0);
+    struct object *objects = NULL;
     do
     {
         sprintf(frame_name, "anim/%s_%03d.png", name, cur_frame);
@@ -192,7 +196,7 @@ void my_main()
                         draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
                     else if (SHADING_MODE == RAYTRACE)
-                        concat_matrix(polygons, temp_poly);
+                        add_object(&objects, temp_poly, constants);
                     temp_poly->lastcol = 0;
                     break;
                 }
@@ -216,9 +220,7 @@ void my_main()
                         draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
                     else if (SHADING_MODE == RAYTRACE)
-                    {
-                        concat_matrix(polygons, temp_poly);
-                    }
+                        add_object(&objects, temp_poly, constants);
                     temp_poly->lastcol = 0;
                     break;
                 }
@@ -240,6 +242,8 @@ void my_main()
                     if (SHADING_MODE == FLAT)
                         draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
+                    else if (SHADING_MODE == RAYTRACE)
+                        add_object(&objects, temp_poly, constants);
                     temp_poly->lastcol = 0;
                     break;
                 }
@@ -383,7 +387,7 @@ void my_main()
                 {
                     if (SHADING_MODE == RAYTRACE)
                     {
-                        ray_trace(*s, polygons, lights, view);
+                        render(*s, objects, lights, ambient);
                     }
                     display(*s);
                     break;
@@ -408,7 +412,6 @@ void my_main()
 
     free_matrix(edges);
     free_matrix(temp_poly);
-    free_matrix(polygons);
     free(s);
     free(zb);
 }
