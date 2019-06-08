@@ -383,7 +383,7 @@ void my_main()
                 {
                     if (SHADING_MODE == RAYTRACE)
                     {
-                        ray_trace(s, polygons);
+                        ray_trace(*s, polygons, lights, view);
                     }
                     display(*s);
                     break;
