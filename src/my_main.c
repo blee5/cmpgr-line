@@ -8,6 +8,7 @@
 #include "imageio.h"
 #include "matrix.h"
 #include "stack.h"
+#include "tracer.h"
 #include "parser.h"
 #include "mdl.tab.h"
 
@@ -94,20 +95,16 @@ struct vary_node **second_pass()
 
 void my_main()
 {
-    /* temp_line_colororary color for lines, replace this later */
-    color temp_line_color;
-    temp_line_color.r = 255;
-    temp_line_color.g = 0;
-    temp_line_color.b = 0;
-
     color ambient;
     struct light *lights[MAX_LIGHTS] = {0};
     int num_lights = 0;
     double view[3];
 
     /* default values */
-    NUM_POLY = 250;
-    SHINYNESS = 1.6;
+    SHADING_MODE = FLAT;
+
+    NUM_POLY = 300;
+    SHINYNESS = 19.6;
     ambient.r = 200;
     ambient.g = 200;
     ambient.b = 200;
@@ -130,6 +127,10 @@ void my_main()
     white.g[SPECULAR_R] = 0.4;
     white.b[SPECULAR_R] = 0.4;
 
+    white.red = 0;
+    white.green = 0;
+    white.blue = 0;
+
     struct vary_node **knobs;
     /* struct vary_node *vn; */
     first_pass();
@@ -141,6 +142,12 @@ void my_main()
     /* initialize image */
     Image *s = init_image();
     zbuffer *zb = init_zbuffer();
+
+    /* initialize matrices for storing points */
+    struct matrix *edges, *temp_poly;
+    edges = new_matrix(4, 0);
+    temp_poly = new_matrix(4, 0);
+    struct object *objects = NULL;
     do
     {
         sprintf(frame_name, "anim/%s_%03d.png", name, cur_frame);
@@ -157,11 +164,6 @@ void my_main()
                 vn = vn->next;
             }
         }
-
-        /* initialize matrices for storing points */
-        struct matrix *edges, *polygons;
-        edges = new_matrix(4, 0);
-        polygons = new_matrix(4, 0);
 
         /* initialize systems for storing coordinate systems */
         struct stack *systems = new_stack();
@@ -187,11 +189,26 @@ void my_main()
                         constants = op[i].op.sphere.constants->s.c;
                     if (op[i].op.sphere.cs)
                         cs = op[i].op.sphere.cs->s.m;
-                    add_sphere(polygons, x, y, z, r, NUM_POLY);
-                    matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
+                    
+                    if (SHADING_MODE == FLAT)
+                    {
+                        add_sphere(temp_poly, x, y, z, r, NUM_POLY);
+                        matrix_mult(cs, temp_poly);
+                        draw_polygons(temp_poly, *s, *zb,
+                                      view, lights, ambient, *constants);
+                    }
+                    else if (SHADING_MODE == RAYTRACE)
+                    {
+                        /* shift the center according to the coordinate system */
+                        /* doesn't handle scaling and i don't know what to do for that AA AaAaA */
+                        add_point(temp_poly, x, y, z);
+                        matrix_mult(cs, temp_poly);
+                        x = mt_idx(temp_poly, 0, 0);
+                        y = mt_idx(temp_poly, 1, 0);
+                        z = mt_idx(temp_poly, 2, 0);
+                        add_object_sphere(&objects, x, y, z, r, constants);
+                    }
+                    temp_poly->lastcol = 0;
                     break;
                 }
                 case BOX:
@@ -207,11 +224,15 @@ void my_main()
                         constants = op[i].op.box.constants->s.c;
                     if (op[i].op.box.cs)
                         cs = op[i].op.box.cs->s.m;
-                    add_box(polygons, x, y, z, h, w, d);
-                    matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
+                    add_box(temp_poly, x, y, z, h, w, d);
+                    matrix_mult(cs, temp_poly);
+
+                    if (SHADING_MODE == FLAT)
+                        draw_polygons(temp_poly, *s, *zb,
+                                      view, lights, ambient, *constants);
+                    else if (SHADING_MODE == RAYTRACE)
+                        add_object(&objects, temp_poly, constants);
+                    temp_poly->lastcol = 0;
                     break;
                 }
                 case TORUS:
@@ -226,30 +247,15 @@ void my_main()
                         constants = op[i].op.torus.constants->s.c;
                     if (op[i].op.torus.cs)
                         cs = op[i].op.torus.cs->s.m;
-                    add_torus(polygons, x0, y0, z0, r0, r1, NUM_POLY);
-                    matrix_mult(cs, polygons);
-                    draw_polygons(polygons, *s, *zb,
-                                  view, lights, ambient, *constants);
-                    polygons->lastcol = 0;
-                    break;
-                }
+                    add_torus(temp_poly, x0, y0, z0, r0, r1, NUM_POLY);
+                    matrix_mult(cs, temp_poly);
 
-                /*
-                 * 2d objects
-                 */
-                case LINE:
-                {
-                    double x0, y0, z0, x1, y1, z1;
-                    x0 = op[i].op.line.p0[0];
-                    y0 = op[i].op.line.p0[1];
-                    z0 = op[i].op.line.p0[0];
-                    x1 = op[i].op.line.p1[0];
-                    y1 = op[i].op.line.p1[1];
-                    z1 = op[i].op.line.p1[2];
-                    add_edge(edges, x0, y0, z0, x1, y1, z1);
-                    matrix_mult(cs, edges);
-                    draw_edges(edges, *s, *zb, temp_line_color);
-                    edges->lastcol = 1;
+                    if (SHADING_MODE == FLAT)
+                        draw_polygons(temp_poly, *s, *zb,
+                                      view, lights, ambient, *constants);
+                    else if (SHADING_MODE == RAYTRACE)
+                        add_object(&objects, temp_poly, constants);
+                    temp_poly->lastcol = 0;
                     break;
                 }
 
@@ -370,13 +376,34 @@ void my_main()
                 /*
                  * misc
                  */
+                case SHADING:
+                {
+                    char *s = op[i].op.shading.p->name;
+                    if (strcmp("flat", s) == 0)
+                    {
+                        SHADING_MODE = FLAT;
+                    }
+                    else if (strcmp("raytrace", s) == 0)
+                    {
+                        SHADING_MODE = RAYTRACE;
+                    }
+                    break;
+                }
                 case SAVE:
                 {
+                    if (SHADING_MODE == RAYTRACE)
+                    {
+                        render(*s, objects, lights, ambient);
+                    }
                     save_image(*s, op[i].op.save.p->name);
                     break;
                 }
                 case DISPLAY:
                 {
+                    if (SHADING_MODE == RAYTRACE)
+                    {
+                        render(*s, objects, lights, ambient);
+                    }
                     display(*s);
                     break;
                 }
@@ -392,14 +419,14 @@ void my_main()
         clear_zbuffer(*zb);
         clear_image(*s);
         free_stack(systems);
-        free_matrix(edges);
-        free_matrix(polygons);
     }
     while (++cur_frame < num_frames);
 
     if (num_frames > 0)
         make_animation(name);
 
+    free_matrix(edges);
+    free_matrix(temp_poly);
     free(s);
     free(zb);
 }

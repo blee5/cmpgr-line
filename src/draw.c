@@ -377,20 +377,17 @@ void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
                    struct constants constants)
 {
     int col;
-    double *normal;
-    /* print_matrix(polygons); */
+    double normal[3];
     for (col = 0; col < polygons->lastcol; col += 3)
     {
         /* Backface culling */
-        normal = calculate_normal(polygons, col);
+        calculate_normal(polygons, col, normal);
         if (dot_product(view, normal) > 0)
         {
             color i = get_lighting(normal, view, ambient, lights, &constants);
             
-            /* display(s); */
             scanline_convert(polygons, col / 3, s, zb, i);
         }
-        free(normal);
     }
 }
 
@@ -483,8 +480,6 @@ void draw_line(int x0, int y0, double z0,
         }
     }
 }
-
-#include <limits.h>
 
 void plot(int x, int y, double z, Image s, zbuffer zb, color c)
 {

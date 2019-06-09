@@ -6,8 +6,15 @@
 #define MAX_COLOR 255
 #define DEFAULT_COLOR 0
 
+enum SHADEMODES
+{
+    FLAT,
+    RAYTRACE,
+};
+
 int NUM_POLY;
 double SHINYNESS;
+int SHADING_MODE;
 
 struct point_t
 {
@@ -17,7 +24,6 @@ struct point_t
 } point_t;
 
 typedef struct point_t color;
-
 typedef struct point_t Image[XRES][YRES];
 typedef double zbuffer[XRES][YRES];
 
