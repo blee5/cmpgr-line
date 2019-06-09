@@ -150,8 +150,8 @@ color trace_ray(double *ray_orig,
 {
     color background;
     background.r = 0;
-    background.g = 180;
-    background.b = 220;
+    background.g = 0;
+    background.b = 0;
     double min_dist = 1e8;
     double min_idx = -1;
     double intersection_point[3];
@@ -319,7 +319,7 @@ void render(Image s, struct object *objs, struct light **lights, color a_light)
             /* z of the image is zero */
             prim_ray[2] = -ray_orig[2];
             normalize(prim_ray);
-            color c = trace_ray(ray_orig, prim_ray, objs, lights, a_light, 5);
+            color c = trace_ray(ray_orig, prim_ray, objs, lights, a_light, 7);
             s[x][y] = c;
         }
     }

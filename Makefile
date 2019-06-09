@@ -16,6 +16,7 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 run: $(TARGET_EXEC)
 	time ./$(TARGET_EXEC) demo.mdl
+	@echo If you have an hour to spare, try uncommenting the line for drawing a torus!
 
 $(PAR_DIR)/lex.yy.c: $(PAR_DIR)/mdl.l $(PAR_DIR)/mdl.tab.h
 	flex -o $@ $(PAR_DIR)/mdl.l
