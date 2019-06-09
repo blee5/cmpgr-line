@@ -1,0 +1,27 @@
+// tests ray tracing, saving the coordinate system, and multiple light systems
+shading raytrace
+light 1 1 1  255 255 255
+
+rotate x -80
+
+constants floor 0.05 0.05 0  0.05 0.3 0  0.05 0.05 0  0 0 0
+constants red 0.1 0.8 0  0.1 0.1 0  0.1 0.1 0  0 0 0
+constants green 0.1 0.1 0  0.1 0.8 0  0.1 0.1 0  0 0 0
+constants blue 0.1 0.1 0  0.1 0.1 0  0.1 0.8 0  0 0 0
+
+sphere floor 150 250 -100000 100000
+
+sphere red 380 480 120 120
+sphere blue 65 265 0 120
+
+move 250 250 0
+scale 1 0.6 1
+rotate x 90
+save_coord_system center
+
+move 42 1337 42
+
+torus 155 60 65 60 70 center
+
+save out.png
+

@@ -103,8 +103,8 @@ void my_main()
     /* default values */
     SHADING_MODE = FLAT;
 
-    NUM_POLY = 10;
-    SHINYNESS = 1.6;
+    NUM_POLY = 300;
+    SHINYNESS = 19.6;
     ambient.r = 200;
     ambient.g = 200;
     ambient.b = 200;
@@ -189,14 +189,25 @@ void my_main()
                         constants = op[i].op.sphere.constants->s.c;
                     if (op[i].op.sphere.cs)
                         cs = op[i].op.sphere.cs->s.m;
-                    add_sphere(temp_poly, x, y, z, r, NUM_POLY);
-                    matrix_mult(cs, temp_poly);
                     
                     if (SHADING_MODE == FLAT)
+                    {
+                        add_sphere(temp_poly, x, y, z, r, NUM_POLY);
+                        matrix_mult(cs, temp_poly);
                         draw_polygons(temp_poly, *s, *zb,
                                       view, lights, ambient, *constants);
+                    }
                     else if (SHADING_MODE == RAYTRACE)
-                        add_object(&objects, temp_poly, constants);
+                    {
+                        /* shift the center according to the coordinate system */
+                        /* doesn't handle scaling and i don't know what to do for that AA AaAaA */
+                        add_point(temp_poly, x, y, z);
+                        matrix_mult(cs, temp_poly);
+                        x = mt_idx(temp_poly, 0, 0);
+                        y = mt_idx(temp_poly, 1, 0);
+                        z = mt_idx(temp_poly, 2, 0);
+                        add_object_sphere(&objects, x, y, z, r, constants);
+                    }
                     temp_poly->lastcol = 0;
                     break;
                 }
@@ -380,6 +391,10 @@ void my_main()
                 }
                 case SAVE:
                 {
+                    if (SHADING_MODE == RAYTRACE)
+                    {
+                        render(*s, objects, lights, ambient);
+                    }
                     save_image(*s, op[i].op.save.p->name);
                     break;
                 }

@@ -386,7 +386,6 @@ void draw_polygons(struct matrix *polygons, Image s, zbuffer zb,
         {
             color i = get_lighting(normal, view, ambient, lights, &constants);
             
-            /* display(s); */
             scanline_convert(polygons, col / 3, s, zb, i);
         }
     }

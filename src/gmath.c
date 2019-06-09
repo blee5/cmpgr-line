@@ -97,9 +97,12 @@ color calculate_specular(struct light light, struct constants *reflect, double *
 void normalize(double *vector)
 {
     double mag = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-    vector[0] /= mag;
-    vector[1] /= mag;
-    vector[2] /= mag;
+    if (mag > 0.001) // do not attempt to normalize zero vector
+    {
+        vector[0] /= mag;
+        vector[1] /= mag;
+        vector[2] /= mag;
+    }
 }
 
 /*
