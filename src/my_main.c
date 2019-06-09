@@ -103,7 +103,7 @@ void my_main()
     /* default values */
     SHADING_MODE = FLAT;
 
-    NUM_POLY = 400;
+    NUM_POLY = 10;
     SHINYNESS = 19.6;
     ambient.r = 200;
     ambient.g = 200;

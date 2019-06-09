@@ -28,10 +28,9 @@ move 42 1337 42
 
 sphere -400 250 -800 500 center
 
-// Comment out the box and uncomment the torus
 // WARNING: The torus takes around at least an hour to render
 box 155 100 400 250 100 300 center
-//torus 155 60 65 60 70 center
+//torus 670 100 85 100 70 center
 
 display
 //save out.png
