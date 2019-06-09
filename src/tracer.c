@@ -278,7 +278,7 @@ end: {}
 
         /* constant for how reflective the surface is */
         /* this should probably be a variable in the constants of the object */
-        double rf = 0.2;
+        double rf = 0.4;
         r *= 1 - rf;
         r += reflected.r * rf;
         g *= 1 - rf;

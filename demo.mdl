@@ -13,6 +13,8 @@ sphere floor 150 250 -100000 100000
 
 sphere red 380 480 120 120
 sphere blue 65 265 0 120
+sphere green 250 250 400 100
+
 
 move 250 250 0
 scale 1 0.6 1
@@ -21,7 +23,10 @@ save_coord_system center
 
 move 42 1337 42
 
-torus 155 60 65 60 70 center
+sphere -400 250 -800 500 center
+
+// WARNING: The torus takes around an hour to render
+// torus 155 60 65 60 70 center
 
 save out.png
 
