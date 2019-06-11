@@ -576,6 +576,8 @@ CONSTANTS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE
     c->green = 0;
     c->blue = 0;
 
+    c->rf = 0;
+
     op[lastop].op.constants.p = add_symbol($2, SYM_CONSTANTS, c);
     op[lastop].opcode=CONSTANTS;
     lastop++;
@@ -603,6 +605,39 @@ CONSTANTS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE 
     c->red = $12;
     c->green = $13;
     c->blue = $14;
+
+    c->rf = 0;
+
+    op[lastop].op.constants.p = add_symbol($2, SYM_CONSTANTS, c);
+    op[lastop].opcode=CONSTANTS;
+    lastop++;
+}|
+
+CONSTANTS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE
+{
+    lineno++;
+    c = malloc(sizeof(struct constants));
+    c->r[0] = $3;
+    c->r[1] = $4;
+    c->r[2] = $5;
+    c->r[3] = 0;
+
+    c->g[0] = $6;
+    c->g[1] = $7;
+    c->g[2] = $8;
+    c->g[3] = 0;
+
+    c->b[0] = $9;
+    c->b[1] = $10;
+    c->b[2] = $11;
+    c->b[3] = 0;
+
+    c->red = $12;
+    c->green = $13;
+    c->blue = $14;
+
+    c->rf = $15;
+
     op[lastop].op.constants.p = add_symbol($2, SYM_CONSTANTS, c);
     op[lastop].opcode=CONSTANTS;
     lastop++;

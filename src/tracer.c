@@ -11,7 +11,7 @@
 #include "gmath.h"
 
 /* used for floating point tests */
-const float EPSILON = 0.0001;
+const float EPSILON = 0.001;
 
 void add_object_sphere(struct object **objs, double x, double y, double z, double r, struct constants *constants)
 {
@@ -229,7 +229,7 @@ color trace_ray(double *ray_orig,
         /* TODO: I'm probably sure this isn't correct */
         l[0] = ray_orig[0] + XRES * light->l[0] - intersection_point[0];
         l[1] = ray_orig[1] + YRES * light->l[1] - intersection_point[1];
-        l[2] = ray_orig[2] + light->l[2] - intersection_point[2];
+        l[2] = ray_orig[2] + 100 * light->l[2] - intersection_point[2];
 
         /* everything breaks if i dont normalize this vector why does this happen */
         normalize(l);
@@ -276,15 +276,13 @@ end: {}
         /* get the color from reflection */
         color reflected = trace_ray(intersection_point, ray_dir, objs, lights, a_light, depth - 1);
 
-        /* constant for how reflective the surface is */
-        /* this should probably be a variable in the constants of the object */
-        double rf = 0.4;
-        r *= 1 - rf;
-        r += reflected.r * rf;
-        g *= 1 - rf;
-        g += reflected.g * rf;
-        b *= 1 - rf;
-        b += reflected.b * rf;
+        /* rf is the constant for how reflective the surface is */
+        r *= 1 - reflect->rf;
+        r += reflected.r * reflect->rf;
+        g *= 1 - reflect->rf;
+        g += reflected.g * reflect->rf;
+        b *= 1 - reflect->rf;
+        b += reflected.b * reflect->rf;
     }
 
     /* clamp to 8bit int */

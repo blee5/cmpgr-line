@@ -19,6 +19,7 @@ struct constants
     double g[4];
     double b[4];
     double red, green, blue;
+    double rf; // reflective value
 };
 
 struct light
