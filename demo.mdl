@@ -33,6 +33,6 @@ sphere white -400 250 -800 500 center
 box white 155 100 400 250 100 300 center
 //torus white 670 100 85 100 70 center
 
-display
-//save out.png
+//display
+save out.png
 

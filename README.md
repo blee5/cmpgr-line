@@ -1,6 +1,8 @@
 # Final Project
-- save\_coordinate\_system
+## Brian Lee, Period 4
+
+- `save_coordinate_system`
 - multiple lights
-- texture mapping
-- ray tracing?
+- `shading raytrace`: ray tracing
+- constants now take an extra double from 0 to 1 indicating how reflective the surface is
 
